@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Data (valutazioni, aziende incl. logo as data URL) lives in Lovable Cloud tables with per-user RLS, accessed from the browser client via src/lib/archivio.ts — sync across devices.
+- App pages live under src/routes/_authenticated/; / is a public landing, /auth handles email+Google sign-in.
