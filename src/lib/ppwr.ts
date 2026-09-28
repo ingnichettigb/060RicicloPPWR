@@ -1,3 +1,6 @@
+import { getLingua, type T } from "./i18n";
+import { LOCALE, type Chiave } from "./traduzioni";
+
 export type Componente = {
   id: string;
   nome: string;
@@ -34,21 +37,28 @@ export const AZIENDA_VUOTA: Azienda = {
   logoDataUrl: "",
 };
 
-export const SOGLIE = [
-  { grado: "A", min: 95, etichetta: "Grado A — Eccellenza", stato: "Ammesso" },
-  { grado: "B", min: 80, etichetta: "Grado B — Alta riciclabilità", stato: "Ammesso" },
-  { grado: "C", min: 70, etichetta: "Grado C — Soglia minima di ammissibilità", stato: "Ammesso" },
-] as const;
+export const SOGLIE: readonly { grado: string; min: number; nome: Chiave; stato: Chiave }[] = [
+  { grado: "A", min: 95, nome: "grado.A", stato: "stato.ammesso" },
+  { grado: "B", min: 80, nome: "grado.B", stato: "stato.ammesso" },
+  { grado: "C", min: 70, nome: "grado.C", stato: "stato.ammesso" },
+];
 
 export type Esito = {
   pesoTotale: number;
   massaRiciclabile: number;
   percentuale: number;
   grado: string;
-  etichetta: string;
-  stato: string;
+  /** chiave di traduzione del nome del grado */
+  nome: Chiave;
+  /** chiave di traduzione dello stato di ammissibilità */
+  stato: Chiave;
   conforme: boolean;
 };
+
+/** Es. "Grado A — Eccellenza" oppure "Non conforme", nella lingua corrente. */
+export function etichettaEsito(e: Esito, t: T): string {
+  return e.conforme ? `${t("grado.label")} ${e.grado} — ${t(e.nome)}` : t(e.nome);
+}
 
 export function calcola(componenti: Componente[]): Esito {
   const pesoTotale = componenti.reduce((s, c) => s + (Number(c.peso) || 0), 0);
@@ -64,14 +74,14 @@ export function calcola(componenti: Componente[]): Esito {
     massaRiciclabile,
     percentuale,
     grado: soglia ? soglia.grado : "—",
-    etichetta: soglia ? soglia.etichetta : "Non conforme",
-    stato: soglia ? soglia.stato : "Non ammesso",
+    nome: soglia ? soglia.nome : "esito.nonConforme",
+    stato: soglia ? soglia.stato : "stato.nonAmmesso",
     conforme: Boolean(soglia),
   };
 }
 
 export function num(valore: number, decimali = 2) {
-  return valore.toLocaleString("it-IT", {
+  return valore.toLocaleString(LOCALE[getLingua()], {
     minimumFractionDigits: decimali,
     maximumFractionDigits: decimali,
   });
@@ -81,16 +91,22 @@ export function nuovoId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-export function valutazioneVuota(): Omit<Valutazione, "id" | "creata"> {
+export function valutazioneVuota(t: T): Omit<Valutazione, "id" | "creata"> {
   return {
-    titolo: "Nuova valutazione",
-    revisione: "REV 01",
+    titolo: t("val.nuova"),
+    revisione: t("val.revisioneIniziale"),
     data: new Date().toISOString().slice(0, 10),
     note: "",
     componenti: [
-      { id: nuovoId(), nome: "Bottiglia", materiale: "PET", peso: 24.5, indice: 100 },
-      { id: nuovoId(), nome: "Tappo", materiale: "HDPE", peso: 2.1, indice: 100 },
-      { id: nuovoId(), nome: "Etichetta", materiale: "Carta metallizzata", peso: 0.8, indice: 0 },
+      { id: nuovoId(), nome: t("demo.bottiglia"), materiale: "PET", peso: 24.5, indice: 100 },
+      { id: nuovoId(), nome: t("demo.tappo"), materiale: "HDPE", peso: 2.1, indice: 100 },
+      {
+        id: nuovoId(),
+        nome: t("demo.etichetta"),
+        materiale: t("demo.cartaMetallizzata"),
+        peso: 0.8,
+        indice: 0,
+      },
     ],
   };
 }

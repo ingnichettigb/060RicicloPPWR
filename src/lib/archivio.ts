@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { traduci } from "./i18n";
 import { AZIENDA_VUOTA, type Azienda, type Componente, type Valutazione } from "./ppwr";
 
 type RigaVal = {
@@ -26,7 +27,7 @@ function daRiga(r: RigaVal): Valutazione {
 
 async function utenteId() {
   const { data } = await supabase.auth.getUser();
-  if (!data.user) throw new Error("Sessione scaduta: accedi di nuovo.");
+  if (!data.user) throw new Error(traduci("comune.sessioneScaduta"));
   return data.user.id;
 }
 
