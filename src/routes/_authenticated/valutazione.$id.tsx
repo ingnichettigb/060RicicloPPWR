@@ -1,58 +1,98 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Intestazione } from "@/components/Intestazione";
-import { useRef } from "react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Copy, Download, FileText, Pencil, Trash2 } from "lucide-react";
+import { Intestazione } from "@/components/Intestazione";
 import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
-import { aziendeDiverse, esportaJson, leggiPacchetto } from "@/lib/esportazione";
+import { esportaJson } from "@/lib/esportazione";
+import { aggiornaValutazione, useAzienda, useValutazione } from "@/lib/archivio";
 import {
-  creaValutazione,
-  eliminaValutazione,
-  salvaAzienda,
-  useAzienda,
-  useRicaricaValutazioni,
-  useValutazioni,
-} from "@/lib/archivio";
-import type { Valutazione } from "@/lib/ppwr";
-import { calcola, nuovoId, num, valutazioneVuota } from "@/lib/ppwr";
+  calcola,
+  etichettaEsito,
+  nuovoId,
+  num,
+  SOGLIE,
+  type Componente,
+  type Valutazione,
+} from "@/lib/ppwr";
 
-export const Route = createFileRoute("/_authenticated/valutazioni")({
+export const Route = createFileRoute("/_authenticated/valutazione/$id")({
   head: () => ({
     meta: [
-      { title: "Valutazioni di riciclabilità — Riciclabilità PPWR" },
+      { title: "Editor valutazione — Riciclabilità PPWR" },
       {
         name: "description",
         content:
-          "Elenco delle valutazioni di riciclabilità degli imballaggi calcolate secondo il Regolamento UE 2025/40 (PPWR).",
+          "Inserisci i componenti dell'imballaggio con peso e indice di riciclabilità e ottieni percentuale e grado PPWR in tempo reale.",
       },
-      { property: "og:title", content: "Valutazioni di riciclabilità — Riciclabilità PPWR" },
+      { property: "og:title", content: "Editor valutazione — Riciclabilità PPWR" },
       {
         property: "og:description",
         content:
-          "Calcola la percentuale di riciclabilità in massa dei tuoi imballaggi e attribuisci il grado PPWR.",
+          "Bilancio di massa e attribuzione del grado di prestazione secondo Reg. UE 2025/40.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Elenco,
+  component: Editor,
 });
 
-const azioneRiga =
-  "inline-grid size-8 place-items-center rounded-md text-mist transition-colors hover:bg-ink/5 hover:text-ink";
-
-function Elenco() {
+function Editor() {
   const t = useT();
-  useTitoloPagina("val.titoloPagina");
-  const { valutazioni, pronto } = useValutazioni();
-  const navigate = useNavigate();
-  const ricarica = useRicaricaValutazioni();
+  useTitoloPagina("ed.titoloPagina");
+  const { id } = useParams({ from: "/_authenticated/valutazione/$id" });
+  const { data, isLoading } = useValutazione(id);
+  const { azienda } = useAzienda();
   const qc = useQueryClient();
-  const { azienda, pronto: aziendaPronta } = useAzienda();
-  const inputFile = useRef<HTMLInputElement>(null);
+  const [v, setV] = useState<Valutazione | null>(null);
+  const [stato, setStato] = useState<"salvato" | "modificato" | "salvataggio" | "errore">(
+    "salvato",
+  );
+  const primo = useRef(true);
 
-  async function esporta(v: Valutazione) {
+  useEffect(() => {
+    if (data && !v) setV(data);
+  }, [data, v]);
+
+  useEffect(() => {
+    if (!v) return;
+    if (primo.current) {
+      primo.current = false;
+      return;
+    }
+    setStato("modificato");
+    const t = setTimeout(async () => {
+      setStato("salvataggio");
+      try {
+        await aggiornaValutazione(v);
+        qc.setQueryData(["valutazione", v.id], v);
+        qc.invalidateQueries({ queryKey: ["valutazioni"] });
+        setStato("salvato");
+      } catch {
+        setStato("errore");
+      }
+    }, 700);
+    return () => clearTimeout(t);
+  }, [v, qc]);
+
+  if (!v) {
+    return (
+      <div className="min-h-screen bg-paper text-ink">
+        <div className="mx-auto max-w-[1180px] px-6 py-7">
+          <Intestazione />
+          <p className="mt-10 text-[13px] text-mist">
+            {isLoading ? t("comune.caricamento") : t("comune.nonTrovata")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const esito = calcola(v.componenti);
+
+  async function esportaFile() {
+    if (!v) return;
     try {
       const nome = await esportaJson(v, azienda);
       if (nome) toast.success(t("json.esportato", { nome }));
@@ -61,60 +101,48 @@ function Elenco() {
     }
   }
 
-  async function importa(file: File | undefined) {
-    if (inputFile.current) inputFile.current.value = "";
-    if (!file) return;
-    try {
-      const { valutazione, azienda: daFile } = await leggiPacchetto(file);
-      // nuovo ID generato dal database: nessuna sovrascrittura di schede esistenti
-      const id = await creaValutazione(valutazione);
-
-      if (daFile && aziendeDiverse(daFile, azienda)) {
-        if (confirm(t("json.chiediAzienda", { nome: daFile.ragioneSociale || "—" }))) {
-          await salvaAzienda(daFile);
-          await qc.invalidateQueries({ queryKey: ["azienda"] });
-          toast.success(t("json.aziendaAggiornata"));
-        }
-      }
-
-      await ricarica();
-      toast.success(t("json.importato", { titolo: valutazione.titolo }));
-      navigate({ to: "/valutazione/$id", params: { id } });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("json.errImportazione"));
-    }
+  function aggiorna(cid: string, campo: keyof Componente, valore: string) {
+    setV((prev) =>
+      prev
+        ? {
+            ...prev,
+            componenti: prev.componenti.map((c) =>
+              c.id === cid
+                ? {
+                    ...c,
+                    [campo]:
+                      campo === "peso" || campo === "indice"
+                        ? Number(valore.replace(",", ".")) || 0
+                        : valore,
+                  }
+                : c,
+            ),
+          }
+        : prev,
+    );
   }
 
-  async function crea() {
-    try {
-      const id = await creaValutazione(valutazioneVuota(t));
-      await ricarica();
-      navigate({ to: "/valutazione/$id", params: { id } });
-    } catch (e) {
-      alert(e instanceof Error ? e.message : t("val.errCrea"));
-    }
+  function aggiungi() {
+    setV((prev) =>
+      prev
+        ? {
+            ...prev,
+            componenti: [
+              ...prev.componenti,
+              { id: nuovoId(), nome: t("ed.nuovoComponente"), materiale: "", peso: 0, indice: 100 },
+            ],
+          }
+        : prev,
+    );
   }
 
-  async function duplica(v: Valutazione) {
-    try {
-      await creaValutazione({
-        titolo: t("val.copia", { titolo: v.titolo }),
-        revisione: v.revisione,
-        data: new Date().toISOString().slice(0, 10),
-        note: v.note,
-        componenti: v.componenti.map((c) => ({ ...c, id: nuovoId() })),
-      });
-      await ricarica();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : t("val.errDuplica"));
-    }
+  function rimuovi(cid: string) {
+    setV((prev) =>
+      prev ? { ...prev, componenti: prev.componenti.filter((c) => c.id !== cid) } : prev,
+    );
   }
 
-  async function elimina(v: Valutazione) {
-    if (!confirm(t("val.confermaElimina", { titolo: v.titolo }))) return;
-    await eliminaValutazione(v.id);
-    await ricarica();
-  }
+  const input = "w-full bg-transparent outline-none focus:bg-signal/5 rounded px-1 py-0.5 -mx-1";
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -122,155 +150,239 @@ function Elenco() {
         <Intestazione
           azione={
             <>
-              <input
-                ref={inputFile}
-                type="file"
-                accept=".json,application/json"
-                className="hidden"
-                onChange={(e) => importa(e.target.files?.[0])}
-              />
               <button
                 type="button"
-                disabled={!aziendaPronta}
-                onClick={() => inputFile.current?.click()}
-                className="ml-2 rounded-lg border border-line bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper disabled:opacity-60"
+                onClick={esportaFile}
+                className="ml-2 rounded-lg border border-line bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper"
               >
-                {t("json.importa")}
+                {t("json.esporta")}
               </button>
-              <button
-                type="button"
-                onClick={crea}
-                className="rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
+              <Link
+                to="/report/$id"
+                params={{ id: v.id }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
               >
-                {t("val.nuova")}
-              </button>
+                <span className="inline-block size-3 shrink-0 rounded-[2px] border border-white/70" />
+                {t("ed.esporta")}
+              </Link>
             </>
           }
         />
 
-        <div className="mt-6 flex items-baseline gap-3">
-          <h1 className="font-display text-[19px] font-semibold leading-tight">
-            {t("val.archivio")}
-          </h1>
-          <span className="font-mono text-[11px] text-mist">
-            {t("val.documenti", { n: valutazioni.length })}
+        <div className="mt-6 flex flex-wrap items-baseline gap-3">
+          <input
+            value={v.titolo}
+            onChange={(e) => setV({ ...v, titolo: e.target.value })}
+            className="min-w-[320px] rounded px-1 py-0.5 font-display text-[19px] font-semibold leading-tight outline-none focus:bg-signal/5"
+          />
+          <input
+            value={v.revisione}
+            onChange={(e) => setV({ ...v, revisione: e.target.value })}
+            className="w-24 rounded px-1 font-mono text-[11px] text-mist outline-none focus:bg-signal/5"
+          />
+          <span
+            className={`font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
+          >
+            {stato === "salvato"
+              ? t("ed.salvato")
+              : stato === "errore"
+                ? t("ed.errSalvataggio")
+                : t("ed.salvataggio")}
           </span>
+          <input
+            type="date"
+            value={v.data}
+            onChange={(e) => setV({ ...v, data: e.target.value })}
+            className="rounded px-1 font-mono text-[11px] text-mist outline-none focus:bg-signal/5"
+          />
         </div>
 
-        <div className="rise mt-5 overflow-hidden rounded-xl bg-white ring-1 ring-black/5">
-          {pronto && valutazioni.length === 0 ? (
-            <div className="px-4 py-14 text-center">
-              <div className="text-[13px] font-medium">{t("val.vuotoTitolo")}</div>
-              <p className="mx-auto mt-2 max-w-sm text-[12px] text-mist">{t("val.vuotoTesto")}</p>
-              <button
-                type="button"
-                onClick={crea}
-                className="mt-5 rounded-lg bg-signal px-4 py-2 text-[13px] font-medium text-primary-foreground"
-              >
-                {t("val.nuova")}
-              </button>
+        <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_352px]">
+          <div className="rise overflow-hidden rounded-xl bg-white ring-1 ring-black/5">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <div className="text-[13px] font-medium">{t("ed.componenti")}</div>
+              <div className="font-mono text-[11px] text-mist">
+                {t("ed.righe", { n: v.componenti.length, peso: num(esito.pesoTotale) })}
+              </div>
             </div>
-          ) : (
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-[10px] uppercase tracking-[0.12em] text-mist">
-                  <th className="px-4 py-2.5 font-medium">{t("val.colValutazione")}</th>
-                  <th className="px-3 py-2.5 font-medium">{t("val.colRevisione")}</th>
-                  <th className="px-3 py-2.5 text-right font-medium">{t("val.colMassa")}</th>
-                  <th className="px-3 py-2.5 text-right font-medium">{t("val.colRicic")}</th>
-                  <th className="px-3 py-2.5 text-center font-medium">{t("val.colGrado")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("ed.colComponente")}</th>
+                  <th className="px-3 py-2.5 font-medium">{t("ed.colMateriale")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPeso")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPercRicic")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colMassaRicic")}</th>
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
-              <tbody>
-                {valutazioni.map((v) => {
-                  const e = calcola(v.componenti);
-                  return (
-                    <tr
-                      key={v.id}
-                      className="border-b border-line/60 transition-colors hover:bg-signal/5"
-                    >
-                      <td className="px-4 py-3">
-                        <Link
-                          to="/valutazione/$id"
-                          params={{ id: v.id }}
-                          className="font-medium hover:text-signal"
-                        >
-                          {v.titolo}
-                        </Link>
-                        <div className="font-mono text-[11px] text-mist">{v.data}</div>
-                      </td>
-                      <td className="px-3 py-3 font-mono text-[12px] text-mist">{v.revisione}</td>
-                      <td className="px-3 py-3 text-right font-mono tabular-nums">
-                        {num(e.pesoTotale)}
-                      </td>
-                      <td className="px-3 py-3 text-right font-mono tabular-nums">
-                        {num(e.percentuale)}%
-                      </td>
-                      <td className="px-3 py-3 text-center">
-                        <span
-                          className={`inline-grid size-7 place-items-center rounded-md font-display text-[13px] font-bold ${
-                            e.conforme ? "bg-signal/10 text-signal" : "bg-danger/10 text-danger"
-                          }`}
-                        >
-                          {e.grado}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="inline-flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => esporta(v)}
-                            title={t("json.esporta")}
-                            aria-label={t("json.esporta")}
-                            className={azioneRiga}
-                          >
-                            <Download className="size-4" />
-                          </button>
-                          <Link
-                            to="/report/$id"
-                            params={{ id: v.id }}
-                            title={t("val.report")}
-                            aria-label={t("val.report")}
-                            className={azioneRiga}
-                          >
-                            <FileText className="size-4" />
-                          </Link>
-                          <Link
-                            to="/valutazione/$id"
-                            params={{ id: v.id }}
-                            title={t("val.modifica")}
-                            aria-label={t("val.modifica")}
-                            className={azioneRiga}
-                          >
-                            <Pencil className="size-4" />
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => duplica(v)}
-                            title={t("val.duplica")}
-                            aria-label={t("val.duplica")}
-                            className={azioneRiga}
-                          >
-                            <Copy className="size-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => elimina(v)}
-                            title={t("val.elimina")}
-                            aria-label={t("val.elimina")}
-                            className={`${azioneRiga} hover:!bg-danger/10 hover:!text-danger`}
-                          >
-                            <Trash2 className="size-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+              <tbody className="font-mono tabular-nums">
+                {v.componenti.map((c) => (
+                  <tr key={c.id} className="transition-colors hover:bg-signal/5">
+                    <td className="px-4 py-2.5 font-body">
+                      <input
+                        value={c.nome}
+                        onChange={(e) => aggiorna(c.id, "nome", e.target.value)}
+                        className={input}
+                      />
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <input
+                        value={c.materiale}
+                        onChange={(e) => aggiorna(c.id, "materiale", e.target.value)}
+                        className={input}
+                      />
+                    </td>
+                    <td className="px-3 py-2.5 text-right">
+                      <input
+                        value={c.peso}
+                        onChange={(e) => aggiorna(c.id, "peso", e.target.value)}
+                        className={`${input} text-right`}
+                      />
+                    </td>
+                    <td className="px-3 py-2.5 text-right">
+                      <input
+                        value={c.indice}
+                        onChange={(e) => aggiorna(c.id, "indice", e.target.value)}
+                        className={`${input} text-right`}
+                      />
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-signal">
+                      {num((c.peso * c.indice) / 100)}
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => rimuovi(c.id)}
+                        className="font-body text-[11px] text-mist hover:text-danger"
+                      >
+                        ×
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
+              <tfoot>
+                <tr className="border-t border-line font-medium">
+                  <td className="px-4 py-3 font-body text-[12px] text-mist">{t("ed.totale")}</td>
+                  <td />
+                  <td className="px-3 py-3 text-right font-mono tabular-nums">
+                    {num(esito.pesoTotale)}
+                  </td>
+                  <td />
+                  <td className="px-3 py-3 text-right font-mono tabular-nums">
+                    {num(esito.massaRiciclabile)}
+                  </td>
+                  <td />
+                </tr>
+              </tfoot>
             </table>
-          )}
+            <div className="border-t border-line px-4 py-3">
+              <button
+                type="button"
+                onClick={aggiungi}
+                className="rounded-lg border border-line px-3 py-1.5 text-[12px] font-medium hover:bg-paper"
+              >
+                {t("ed.aggiungi")}
+              </button>
+            </div>
+          </div>
+
+          <aside className="rise space-y-4">
+            <div className="relative overflow-hidden rounded-xl bg-white p-5 ring-1 ring-black/5">
+              <div className="absolute -right-10 -top-8 size-40 rounded-[50%] bg-signal/10 blur-2xl" />
+              <div className="absolute -bottom-10 -left-6 size-32 rounded-[50%] bg-signal/5 blur-2xl" />
+              <div className="relative">
+                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
+                  {t("ed.calcolata")}
+                </div>
+                <div className="mt-1 flex items-end gap-2">
+                  <span
+                    className={`font-display text-[52px] font-bold leading-none tracking-tight ${
+                      esito.conforme ? "text-signal" : "text-danger"
+                    }`}
+                  >
+                    {num(esito.percentuale)}
+                  </span>
+                  <span className="pb-1 font-display text-[24px] font-semibold leading-none text-mist">
+                    %
+                  </span>
+                </div>
+                <div className="mt-1.5 text-[12px] text-mist">
+                  {t("ed.gRiciclabili", {
+                    m: num(esito.massaRiciclabile),
+                    t: num(esito.pesoTotale),
+                  })}
+                </div>
+
+                <div className="mt-5">
+                  <div className="relative h-2 overflow-hidden rounded-full bg-line">
+                    <div
+                      className={`absolute inset-y-0 left-0 transition-all duration-500 ${
+                        esito.conforme ? "bg-signal" : "bg-danger"
+                      }`}
+                      style={{ width: `${Math.min(100, Math.max(0, esito.percentuale))}%` }}
+                    />
+                  </div>
+                  <div className="relative mt-2 h-3 font-mono text-[10px] text-mist">
+                    <span className="absolute left-[70%] -translate-x-1/2">70%</span>
+                    <span className="absolute left-[80%] -translate-x-1/2">80%</span>
+                    <span className="absolute left-[95%] -translate-x-1/2">95%</span>
+                  </div>
+                  <div className="mt-1 text-[11px] text-mist">
+                    {t("ed.sogliaMin")} <span className="font-medium text-ink">≥ 70%</span>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center gap-3 border-t border-line pt-4">
+                  <div
+                    className={`grid size-11 place-items-center rounded-lg font-display text-[18px] font-bold ${
+                      esito.conforme ? "bg-signal/10 text-signal" : "bg-danger/10 text-danger"
+                    }`}
+                  >
+                    {esito.grado}
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-medium">{etichettaEsito(esito, t)}</div>
+                    <div className="text-[11px] text-mist">{t(esito.stato)}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-white p-5 ring-1 ring-black/5">
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
+                {t("ed.soglie")}
+              </div>
+              <div className="mt-3 space-y-2 text-[12px]">
+                {SOGLIE.map((s) => (
+                  <div key={s.grado} className="flex justify-between font-mono tabular-nums">
+                    <span className="text-mist">
+                      {t("grado.label")} {s.grado}
+                    </span>
+                    <span className={esito.grado === s.grado ? "text-signal" : ""}>≥ {s.min}%</span>
+                  </div>
+                ))}
+                <div className="flex justify-between font-mono tabular-nums">
+                  <span className="text-mist">{t("esito.nonConforme")}</span>
+                  <span className={esito.conforme ? "" : "text-danger"}>&lt; 70%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-white p-5 ring-1 ring-black/5">
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
+                {t("ed.note")}
+              </div>
+              <textarea
+                value={v.note}
+                onChange={(e) => setV({ ...v, note: e.target.value })}
+                rows={4}
+                placeholder={t("ed.notePlaceholder")}
+                className="mt-2 w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[12px] outline-none focus:border-signal"
+              />
+            </div>
+          </aside>
         </div>
       </div>
     </div>

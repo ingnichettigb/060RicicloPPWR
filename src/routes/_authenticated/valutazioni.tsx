@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Intestazione } from "@/components/Intestazione";
 import { useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Download } from "lucide-react";
+import { Copy, Download, FileText, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
 import { aziendeDiverse, esportaJson, leggiPacchetto } from "@/lib/esportazione";
@@ -38,6 +38,9 @@ export const Route = createFileRoute("/_authenticated/valutazioni")({
   }),
   component: Elenco,
 });
+
+const azioneRiga =
+  "inline-grid size-8 place-items-center rounded-md text-mist transition-colors hover:bg-ink/5 hover:text-ink";
 
 function Elenco() {
   const t = useT();
@@ -214,43 +217,53 @@ function Elenco() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => esporta(v)}
-                          title={t("json.esporta")}
-                          aria-label={t("json.esporta")}
-                          className="mr-3 inline-flex translate-y-[3px] text-mist hover:text-ink"
-                        >
-                          <Download className="size-3.5" />
-                        </button>
-                        <Link
-                          to="/report/$id"
-                          params={{ id: v.id }}
-                          className="mr-3 text-[12px] text-mist hover:text-ink"
-                        >
-                          {t("val.report")}
-                        </Link>
-                        <Link
-                          to="/valutazione/$id"
-                          params={{ id: v.id }}
-                          className="mr-3 text-[12px] text-mist hover:text-ink"
-                        >
-                          {t("val.modifica")}
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => duplica(v)}
-                          className="mr-3 text-[12px] text-mist hover:text-ink"
-                        >
-                          {t("val.duplica")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => elimina(v)}
-                          className="text-[12px] text-mist hover:text-danger"
-                        >
-                          {t("val.elimina")}
-                        </button>
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => esporta(v)}
+                            title={t("json.esporta")}
+                            aria-label={t("json.esporta")}
+                            className={azioneRiga}
+                          >
+                            <Download className="size-4" />
+                          </button>
+                          <Link
+                            to="/report/$id"
+                            params={{ id: v.id }}
+                            title={t("val.report")}
+                            aria-label={t("val.report")}
+                            className={azioneRiga}
+                          >
+                            <FileText className="size-4" />
+                          </Link>
+                          <Link
+                            to="/valutazione/$id"
+                            params={{ id: v.id }}
+                            title={t("val.modifica")}
+                            aria-label={t("val.modifica")}
+                            className={azioneRiga}
+                          >
+                            <Pencil className="size-4" />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => duplica(v)}
+                            title={t("val.duplica")}
+                            aria-label={t("val.duplica")}
+                            className={azioneRiga}
+                          >
+                            <Copy className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => elimina(v)}
+                            title={t("val.elimina")}
+                            aria-label={t("val.elimina")}
+                            className={`${azioneRiga} hover:!bg-danger/10 hover:!text-danger`}
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
