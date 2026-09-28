@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      aziende: {
+        Row: {
+          email: string
+          indirizzo: string
+          logo_data_url: string
+          partita_iva: string
+          ragione_sociale: string
+          referente: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email?: string
+          indirizzo?: string
+          logo_data_url?: string
+          partita_iva?: string
+          ragione_sociale?: string
+          referente?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email?: string
+          indirizzo?: string
+          logo_data_url?: string
+          partita_iva?: string
+          ragione_sociale?: string
+          referente?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      valutazioni: {
+        Row: {
+          componenti: Json
+          created_at: string
+          data: string
+          id: string
+          note: string
+          revisione: string
+          titolo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          componenti?: Json
+          created_at?: string
+          data?: string
+          id?: string
+          note?: string
+          revisione?: string
+          titolo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          componenti?: Json
+          created_at?: string
+          data?: string
+          id?: string
+          note?: string
+          revisione?: string
+          titolo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
