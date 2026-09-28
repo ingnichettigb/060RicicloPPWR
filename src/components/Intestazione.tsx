@@ -1,8 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SelettoreLingua } from "@/components/SelettoreLingua";
+import { useT } from "@/lib/i18n";
 
 export function Intestazione({ azione }: { azione?: React.ReactNode }) {
+  const t = useT();
   const voce = "px-3 py-1.5 text-mist hover:text-ink transition-colors rounded-md";
   const attiva = { className: "px-3 py-1.5 rounded-md bg-ink/5 font-medium text-ink" };
   const navigate = useNavigate();
@@ -23,23 +26,22 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
         </div>
         <div>
           <div className="font-display text-[15px] font-semibold leading-none tracking-tight">
-            Riciclabilità PPWR
+            {t("app.nome")}
           </div>
-          <div className="font-mono text-[11px] text-mist">
-            Determinazione % riciclabilità · Reg. (UE) 2025/40
-          </div>
+          <div className="font-mono text-[11px] text-mist">{t("app.sottotitolo")}</div>
         </div>
       </Link>
       <nav className="flex flex-wrap items-center gap-1 text-[13px]">
         <Link to="/valutazioni" className={voce} activeProps={attiva}>
-          Valutazioni
+          {t("nav.valutazioni")}
         </Link>
         <Link to="/impostazioni" className={voce} activeProps={attiva}>
-          Impostazioni
+          {t("nav.impostazioni")}
         </Link>
         <button type="button" onClick={esci} className={voce}>
-          Esci
+          {t("nav.esci")}
         </button>
+        <SelettoreLingua />
         {azione}
       </nav>
     </header>
