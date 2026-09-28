@@ -37,7 +37,7 @@ export const AZIENDA_VUOTA: Azienda = {
 export const SOGLIE = [
   { grado: "A", min: 95, etichetta: "Grado A — Eccellenza", stato: "Ammesso" },
   { grado: "B", min: 80, etichetta: "Grado B — Alta riciclabilità", stato: "Ammesso" },
-  { grado: "C", min: 70, etichetta: "Grado C — Soglia minima", stato: "Ammesso" },
+  { grado: "C", min: 70, etichetta: "Grado C — Soglia minima di ammissibilità", stato: "Ammesso" },
 ] as const;
 
 export type Esito = {
@@ -64,8 +64,8 @@ export function calcola(componenti: Componente[]): Esito {
     massaRiciclabile,
     percentuale,
     grado: soglia ? soglia.grado : "—",
-    etichetta: soglia ? soglia.etichetta : "Non classificato",
-    stato: soglia ? soglia.stato : "Vietato dal 2030",
+    etichetta: soglia ? soglia.etichetta : "Non conforme",
+    stato: soglia ? soglia.stato : "Non ammesso",
     conforme: Boolean(soglia),
   };
 }
@@ -81,18 +81,16 @@ export function nuovoId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-export function valutazioneVuota(): Valutazione {
+export function valutazioneVuota(): Omit<Valutazione, "id" | "creata"> {
   return {
-    id: nuovoId(),
     titolo: "Nuova valutazione",
     revisione: "REV 01",
     data: new Date().toISOString().slice(0, 10),
     note: "",
     componenti: [
-      { id: nuovoId(), nome: "Serbatoio inox", materiale: "AISI 304", peso: 74.2, indice: 100 },
-      { id: nuovoId(), nome: "Camicia termica", materiale: "AISI 316L", peso: 28.8, indice: 100 },
-      { id: nuovoId(), nome: "Guarnizioni", materiale: "EPDM / FKM", peso: 3.2, indice: 0 },
+      { id: nuovoId(), nome: "Bottiglia", materiale: "PET", peso: 24.5, indice: 100 },
+      { id: nuovoId(), nome: "Tappo", materiale: "HDPE", peso: 2.1, indice: 100 },
+      { id: nuovoId(), nome: "Etichetta", materiale: "Carta metallizzata", peso: 0.8, indice: 0 },
     ],
-    creata: new Date().toISOString(),
   };
 }
