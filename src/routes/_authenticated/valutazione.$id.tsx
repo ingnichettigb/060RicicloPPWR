@@ -2,8 +2,9 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Intestazione } from "@/components/Intestazione";
+import { useT, useTitoloPagina } from "@/lib/i18n";
 import { aggiornaValutazione, useValutazione } from "@/lib/archivio";
-import { calcola, nuovoId, num, SOGLIE, type Componente, type Valutazione } from "@/lib/ppwr";
+import { calcola, etichettaEsito, nuovoId, num, SOGLIE, type Componente, type Valutazione } from "@/lib/ppwr";
 
 export const Route = createFileRoute("/_authenticated/valutazione/$id")({
   head: () => ({
@@ -27,6 +28,8 @@ export const Route = createFileRoute("/_authenticated/valutazione/$id")({
 });
 
 function Editor() {
+  const t = useT();
+  useTitoloPagina("ed.titoloPagina");
   const { id } = useParams({ from: "/_authenticated/valutazione/$id" });
   const { data, isLoading } = useValutazione(id);
   const qc = useQueryClient();
@@ -64,7 +67,7 @@ function Editor() {
       <div className="min-h-screen bg-paper text-ink">
         <div className="mx-auto max-w-[1180px] px-6 py-7">
           <Intestazione />
-          <p className="mt-10 text-[13px] text-mist">{isLoading ? "Caricamento…" : "Valutazione non trovata."}</p>
+          <p className="mt-10 text-[13px] text-mist">{isLoading ? t("comune.caricamento") : t("comune.nonTrovata")}</p>
         </div>
       </div>
     );
@@ -100,7 +103,7 @@ function Editor() {
             ...prev,
             componenti: [
               ...prev.componenti,
-              { id: nuovoId(), nome: "Nuovo componente", materiale: "", peso: 0, indice: 100 },
+              { id: nuovoId(), nome: t("ed.nuovoComponente"), materiale: "", peso: 0, indice: 100 },
             ],
           }
         : prev,
@@ -127,7 +130,7 @@ function Editor() {
               className="ml-2 inline-flex items-center gap-1.5 rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
             >
               <span className="inline-block size-3 shrink-0 rounded-[2px] border border-white/70" />
-              Esporta report
+              {t("ed.esporta")}
             </Link>
           }
         />
@@ -144,7 +147,7 @@ function Editor() {
             className="w-24 rounded px-1 font-mono text-[11px] text-mist outline-none focus:bg-signal/5"
           />
           <span className={`font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}>
-            {stato === "salvato" ? "✓ salvato online" : stato === "errore" ? "errore di salvataggio" : "salvataggio…"}
+            {stato === "salvato" ? t("ed.salvato") : stato === "errore" ? t("ed.errSalvataggio") : t("ed.salvataggio")}
           </span>
           <input
             type="date"
@@ -157,19 +160,19 @@ function Editor() {
         <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_352px]">
           <div className="rise overflow-hidden rounded-xl bg-white ring-1 ring-black/5">
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
-              <div className="text-[13px] font-medium">Componenti — bilancio di massa</div>
+              <div className="text-[13px] font-medium">{t("ed.componenti")}</div>
               <div className="font-mono text-[11px] text-mist">
-                {v.componenti.length} righe · massa totale {num(esito.pesoTotale)} g
+                {t("ed.righe", { n: v.componenti.length, peso: num(esito.pesoTotale) })}
               </div>
             </div>
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-[10px] uppercase tracking-[0.12em] text-mist">
-                  <th className="px-4 py-2.5 font-medium">Componente</th>
-                  <th className="px-3 py-2.5 font-medium">Materiale</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Peso (g)</th>
-                  <th className="px-3 py-2.5 text-right font-medium">% ricic.</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Massa ricic. (g)</th>
+                  <th className="px-4 py-2.5 font-medium">{t("ed.colComponente")}</th>
+                  <th className="px-3 py-2.5 font-medium">{t("ed.colMateriale")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPeso")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPercRicic")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colMassaRicic")}</th>
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
@@ -221,7 +224,7 @@ function Editor() {
               </tbody>
               <tfoot>
                 <tr className="border-t border-line font-medium">
-                  <td className="px-4 py-3 font-body text-[12px] text-mist">Totale</td>
+                  <td className="px-4 py-3 font-body text-[12px] text-mist">{t("ed.totale")}</td>
                   <td />
                   <td className="px-3 py-3 text-right font-mono tabular-nums">
                     {num(esito.pesoTotale)}
@@ -240,7 +243,7 @@ function Editor() {
                 onClick={aggiungi}
                 className="rounded-lg border border-line px-3 py-1.5 text-[12px] font-medium hover:bg-paper"
               >
-                + Aggiungi componente
+                {t("ed.aggiungi")}
               </button>
             </div>
           </div>
@@ -251,7 +254,7 @@ function Editor() {
               <div className="absolute -bottom-10 -left-6 size-32 rounded-[50%] bg-signal/5 blur-2xl" />
               <div className="relative">
                 <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
-                  Riciclabilità calcolata
+                  {t("ed.calcolata")}
                 </div>
                 <div className="mt-1 flex items-end gap-2">
                   <span
@@ -266,7 +269,7 @@ function Editor() {
                   </span>
                 </div>
                 <div className="mt-1.5 text-[12px] text-mist">
-                  {num(esito.massaRiciclabile)} g riciclabili su {num(esito.pesoTotale)} g
+                  {t("ed.gRiciclabili", { m: num(esito.massaRiciclabile), t: num(esito.pesoTotale) })}
                 </div>
 
                 <div className="mt-5">
@@ -284,7 +287,7 @@ function Editor() {
                     <span className="absolute left-[95%] -translate-x-1/2">95%</span>
                   </div>
                   <div className="mt-1 text-[11px] text-mist">
-                    Soglia minima di ammissibilità 2030:{" "}
+                    {t("ed.sogliaMin")}{" "}
                     <span className="font-medium text-ink">≥ 70%</span>
                   </div>
                 </div>
@@ -298,8 +301,8 @@ function Editor() {
                     {esito.grado}
                   </div>
                   <div>
-                    <div className="text-[13px] font-medium">{esito.etichetta}</div>
-                    <div className="text-[11px] text-mist">{esito.stato}</div>
+                    <div className="text-[13px] font-medium">{etichettaEsito(esito, t)}</div>
+                    <div className="text-[11px] text-mist">{t(esito.stato)}</div>
                   </div>
                 </div>
               </div>
@@ -307,17 +310,17 @@ function Editor() {
 
             <div className="rounded-xl bg-white p-5 ring-1 ring-black/5">
               <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
-                Soglie Allegato II Tab. 3
+                {t("ed.soglie")}
               </div>
               <div className="mt-3 space-y-2 text-[12px]">
                 {SOGLIE.map((s) => (
                   <div key={s.grado} className="flex justify-between font-mono tabular-nums">
-                    <span className="text-mist">Grado {s.grado}</span>
+                    <span className="text-mist">{t("grado.label")} {s.grado}</span>
                     <span className={esito.grado === s.grado ? "text-signal" : ""}>≥ {s.min}%</span>
                   </div>
                 ))}
                 <div className="flex justify-between font-mono tabular-nums">
-                  <span className="text-mist">Non conforme</span>
+                  <span className="text-mist">{t("esito.nonConforme")}</span>
                   <span className={esito.conforme ? "" : "text-danger"}>&lt; 70%</span>
                 </div>
               </div>
@@ -325,13 +328,13 @@ function Editor() {
 
             <div className="rounded-xl bg-white p-5 ring-1 ring-black/5">
               <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
-                Note tecniche
+                {t("ed.note")}
               </div>
               <textarea
                 value={v.note}
                 onChange={(e) => setV({ ...v, note: e.target.value })}
                 rows={4}
-                placeholder="Ipotesi di calcolo, riferimenti alla distinta base, scomposizione componenti complessi…"
+                placeholder={t("ed.notePlaceholder")}
                 className="mt-2 w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[12px] outline-none focus:border-signal"
               />
             </div>

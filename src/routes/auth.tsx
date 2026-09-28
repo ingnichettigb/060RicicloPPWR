@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { SelettoreLingua } from "@/components/SelettoreLingua";
+import { useT, useTitoloPagina } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -18,6 +20,8 @@ export const Route = createFileRoute("/auth")({
 });
 
 function Auth() {
+  const t = useT();
+  useTitoloPagina("auth.titoloPagina");
   const navigate = useNavigate();
   const [modo, setModo] = useState<"accedi" | "registrati">("accedi");
   const [email, setEmail] = useState("");
@@ -39,7 +43,7 @@ function Auth() {
     e.preventDefault();
     setMsg(null);
     if (!/^\S+@\S+\.\S+$/.test(email.trim()) || password.length < 6) {
-      setMsg("Inserisci un'email valida e una password di almeno 6 caratteri.");
+      setMsg(t("auth.errValidazione"));
       return;
     }
     setBusy(true);
@@ -54,10 +58,10 @@ function Auth() {
           options: { emailRedirectTo: `${window.location.origin}/valutazioni` },
         });
         if (error) throw error;
-        if (!data.session) setMsg("Controlla la tua email per confermare la registrazione.");
+        if (!data.session) setMsg(t("auth.controllaEmail"));
       }
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Operazione non riuscita.");
+      setMsg(err instanceof Error ? err.message : t("auth.errGenerico"));
     } finally {
       setBusy(false);
     }
@@ -65,7 +69,7 @@ function Auth() {
 
   async function google() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (r.error) setMsg("Accesso con Google non riuscito.");
+    if (r.error) setMsg(t("auth.errGoogle"));
   }
 
   const campo =
@@ -74,29 +78,32 @@ function Auth() {
   return (
     <div className="grid min-h-screen place-items-center bg-paper px-6 text-ink">
       <div className="w-full max-w-sm">
-        <Link to="/" className="mb-6 flex items-center gap-3">
-          <div className="grid size-9 place-items-center rounded-[9px] bg-ink font-display text-[15px] font-bold text-paper">R</div>
-          <div className="font-display text-[15px] font-semibold">Riciclabilità PPWR</div>
-        </Link>
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="grid size-9 place-items-center rounded-[9px] bg-ink font-display text-[15px] font-bold text-paper">R</div>
+            <div className="font-display text-[15px] font-semibold">{t("app.nome")}</div>
+          </Link>
+          <SelettoreLingua />
+        </div>
         <div className="rise rounded-xl bg-white p-6 ring-1 ring-black/5">
           <h1 className="font-display text-[19px] font-semibold">
-            {modo === "accedi" ? "Accedi" : "Crea un account"}
+            {modo === "accedi" ? t("auth.accedi") : t("auth.crea")}
           </h1>
           <form onSubmit={invia} className="mt-4 space-y-3">
             <label className="block">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">Email</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">{t("auth.email")}</span>
               <input type="email" value={email} maxLength={255} onChange={(e) => setEmail(e.target.value)} className={campo} />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">Password</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">{t("auth.password")}</span>
               <input type="password" value={password} maxLength={72} onChange={(e) => setPassword(e.target.value)} className={campo} />
             </label>
             <button disabled={busy} className="w-full rounded-lg bg-signal px-4 py-2 text-[13px] font-medium text-primary-foreground disabled:opacity-60">
-              {modo === "accedi" ? "Accedi" : "Registrati"}
+              {modo === "accedi" ? t("auth.accedi") : t("auth.registrati")}
             </button>
           </form>
           <button type="button" onClick={google} className="mt-3 w-full rounded-lg border border-line px-4 py-2 text-[13px] font-medium hover:bg-paper">
-            Continua con Google
+            {t("auth.google")}
           </button>
           {msg && <p className="mt-3 text-[12px] text-danger">{msg}</p>}
           <button
@@ -104,7 +111,7 @@ function Auth() {
             onClick={() => setModo(modo === "accedi" ? "registrati" : "accedi")}
             className="mt-4 w-full text-[12px] text-mist hover:text-ink"
           >
-            {modo === "accedi" ? "Non hai un account? Registrati" : "Hai già un account? Accedi"}
+            {modo === "accedi" ? t("auth.noAccount") : t("auth.haAccount")}
           </button>
         </div>
       </div>

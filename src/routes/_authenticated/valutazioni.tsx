@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Intestazione } from "@/components/Intestazione";
+import { useT, useTitoloPagina } from "@/lib/i18n";
 import {
   creaValutazione,
   eliminaValutazione,
@@ -32,24 +33,26 @@ export const Route = createFileRoute("/_authenticated/valutazioni")({
 });
 
 function Elenco() {
+  const t = useT();
+  useTitoloPagina("val.titoloPagina");
   const { valutazioni, pronto } = useValutazioni();
   const navigate = useNavigate();
   const ricarica = useRicaricaValutazioni();
 
   async function crea() {
     try {
-      const id = await creaValutazione(valutazioneVuota());
+      const id = await creaValutazione(valutazioneVuota(t));
       await ricarica();
       navigate({ to: "/valutazione/$id", params: { id } });
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Creazione non riuscita");
+      alert(e instanceof Error ? e.message : t("val.errCrea"));
     }
   }
 
   async function duplica(v: Valutazione) {
     try {
       await creaValutazione({
-        titolo: `${v.titolo} (copia)`,
+        titolo: t("val.copia", { titolo: v.titolo }),
         revisione: v.revisione,
         data: new Date().toISOString().slice(0, 10),
         note: v.note,
@@ -57,12 +60,12 @@ function Elenco() {
       });
       await ricarica();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Duplicazione non riuscita");
+      alert(e instanceof Error ? e.message : t("val.errDuplica"));
     }
   }
 
   async function elimina(v: Valutazione) {
-    if (!confirm(`Eliminare "${v.titolo}"?`)) return;
+    if (!confirm(t("val.confermaElimina", { titolo: v.titolo }))) return;
     await eliminaValutazione(v.id);
     await ricarica();
   }
@@ -77,45 +80,42 @@ function Elenco() {
               onClick={crea}
               className="ml-2 rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
             >
-              Nuova valutazione
+              {t("val.nuova")}
             </button>
           }
         />
 
         <div className="mt-6 flex items-baseline gap-3">
           <h1 className="font-display text-[19px] font-semibold leading-tight">
-            Archivio valutazioni
+            {t("val.archivio")}
           </h1>
           <span className="font-mono text-[11px] text-mist">
-            {valutazioni.length} documenti · sincronizzati online
+            {t("val.documenti", { n: valutazioni.length })}
           </span>
         </div>
 
         <div className="rise mt-5 overflow-hidden rounded-xl bg-white ring-1 ring-black/5">
           {pronto && valutazioni.length === 0 ? (
             <div className="px-4 py-14 text-center">
-              <div className="text-[13px] font-medium">Nessuna valutazione presente</div>
-              <p className="mx-auto mt-2 max-w-sm text-[12px] text-mist">
-                Crea la prima valutazione: inserisci i componenti dell&apos;imballaggio con peso e
-                indice di riciclabilità, il grado PPWR viene calcolato automaticamente.
-              </p>
+              <div className="text-[13px] font-medium">{t("val.vuotoTitolo")}</div>
+              <p className="mx-auto mt-2 max-w-sm text-[12px] text-mist">{t("val.vuotoTesto")}</p>
               <button
                 type="button"
                 onClick={crea}
                 className="mt-5 rounded-lg bg-signal px-4 py-2 text-[13px] font-medium text-primary-foreground"
               >
-                Nuova valutazione
+                {t("val.nuova")}
               </button>
             </div>
           ) : (
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-[10px] uppercase tracking-[0.12em] text-mist">
-                  <th className="px-4 py-2.5 font-medium">Valutazione</th>
-                  <th className="px-3 py-2.5 font-medium">Revisione</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Massa (g)</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Riciclabilità</th>
-                  <th className="px-3 py-2.5 text-center font-medium">Grado</th>
+                  <th className="px-4 py-2.5 font-medium">{t("val.colValutazione")}</th>
+                  <th className="px-3 py-2.5 font-medium">{t("val.colRevisione")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("val.colMassa")}</th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("val.colRicic")}</th>
+                  <th className="px-3 py-2.5 text-center font-medium">{t("val.colGrado")}</th>
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
@@ -156,28 +156,28 @@ function Elenco() {
                           params={{ id: v.id }}
                           className="mr-3 text-[12px] text-mist hover:text-ink"
                         >
-                          Report
+                          {t("val.report")}
                         </Link>
                         <Link
                           to="/valutazione/$id"
                           params={{ id: v.id }}
                           className="mr-3 text-[12px] text-mist hover:text-ink"
                         >
-                          Modifica
+                          {t("val.modifica")}
                         </Link>
                         <button
                           type="button"
                           onClick={() => duplica(v)}
                           className="mr-3 text-[12px] text-mist hover:text-ink"
                         >
-                          Duplica
+                          {t("val.duplica")}
                         </button>
                         <button
                           type="button"
                           onClick={() => elimina(v)}
                           className="text-[12px] text-mist hover:text-danger"
                         >
-                          Elimina
+                          {t("val.elimina")}
                         </button>
                       </td>
                     </tr>
