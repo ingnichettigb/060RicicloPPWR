@@ -1,7 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { SOGLIE } from "@/lib/ppwr";
+import { AUTO_LOGIN } from "@/lib/devAuth";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: () => {
+    if (AUTO_LOGIN) throw redirect({ to: "/valutazioni" });
+  },
   head: () => ({
     meta: [
       { title: "Riciclabilità PPWR — Calcolo grado di riciclabilità imballaggi" },
