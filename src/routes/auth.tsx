@@ -9,9 +9,15 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Accedi — Riciclabilità PPWR" },
-      { name: "description", content: "Accedi o registrati per salvare online le tue valutazioni di riciclabilità PPWR." },
+      {
+        name: "description",
+        content: "Accedi o registrati per salvare online le tue valutazioni di riciclabilità PPWR.",
+      },
       { property: "og:title", content: "Accedi — Riciclabilità PPWR" },
-      { property: "og:description", content: "Valutazioni, dati aziendali e logo sincronizzati su tutti i dispositivi." },
+      {
+        property: "og:description",
+        content: "Valutazioni, dati aziendali e logo sincronizzati su tutti i dispositivi.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -68,7 +74,9 @@ function Auth() {
   }
 
   async function google() {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
+    const r = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/auth",
+    });
     if (r.error) setMsg(t("auth.errGoogle"));
   }
 
@@ -80,7 +88,9 @@ function Auth() {
       <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-[9px] bg-ink font-display text-[15px] font-bold text-paper">R</div>
+            <div className="grid size-9 place-items-center rounded-[9px] bg-ink font-display text-[15px] font-bold text-paper">
+              R
+            </div>
             <div className="font-display text-[15px] font-semibold">{t("app.nome")}</div>
           </Link>
           <SelettoreLingua />
@@ -91,18 +101,41 @@ function Auth() {
           </h1>
           <form onSubmit={invia} className="mt-4 space-y-3">
             <label className="block">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">{t("auth.email")}</span>
-              <input type="email" value={email} maxLength={255} onChange={(e) => setEmail(e.target.value)} className={campo} />
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">
+                {t("auth.email")}
+              </span>
+              <input
+                type="email"
+                value={email}
+                maxLength={255}
+                onChange={(e) => setEmail(e.target.value)}
+                className={campo}
+              />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">{t("auth.password")}</span>
-              <input type="password" value={password} maxLength={72} onChange={(e) => setPassword(e.target.value)} className={campo} />
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mist">
+                {t("auth.password")}
+              </span>
+              <input
+                type="password"
+                value={password}
+                maxLength={72}
+                onChange={(e) => setPassword(e.target.value)}
+                className={campo}
+              />
             </label>
-            <button disabled={busy} className="w-full rounded-lg bg-signal px-4 py-2 text-[13px] font-medium text-primary-foreground disabled:opacity-60">
+            <button
+              disabled={busy}
+              className="w-full rounded-lg bg-signal px-4 py-2 text-[13px] font-medium text-primary-foreground disabled:opacity-60"
+            >
               {modo === "accedi" ? t("auth.accedi") : t("auth.registrati")}
             </button>
           </form>
-          <button type="button" onClick={google} className="mt-3 w-full rounded-lg border border-line px-4 py-2 text-[13px] font-medium hover:bg-paper">
+          <button
+            type="button"
+            onClick={google}
+            className="mt-3 w-full rounded-lg border border-line px-4 py-2 text-[13px] font-medium hover:bg-paper"
+          >
             {t("auth.google")}
           </button>
           {msg && <p className="mt-3 text-[12px] text-danger">{msg}</p>}

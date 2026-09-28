@@ -16,7 +16,8 @@ export const Route = createFileRoute("/_authenticated/report/$id")({
       { property: "og:title", content: "Report di riciclabilità — Riciclabilità PPWR" },
       {
         property: "og:description",
-        content: "Documento di valutazione conforme al Regolamento UE 2025/40, pronto per la stampa.",
+        content:
+          "Documento di valutazione conforme al Regolamento UE 2025/40, pronto per la stampa.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -37,7 +38,9 @@ function Report() {
       <div className="min-h-screen bg-paper text-ink">
         <div className="mx-auto max-w-[1180px] px-6 py-7">
           <Intestazione />
-          <p className="mt-10 text-[13px] text-mist">{isLoading ? t("comune.caricamento") : t("comune.nonTrovata")}</p>
+          <p className="mt-10 text-[13px] text-mist">
+            {isLoading ? t("comune.caricamento") : t("comune.nonTrovata")}
+          </p>
         </div>
       </div>
     );
@@ -95,7 +98,11 @@ function Report() {
               )}
             </div>
             {azienda.logoDataUrl && (
-              <img src={azienda.logoDataUrl} alt={t("comune.logoAlt")} className="max-h-16 max-w-[180px]" />
+              <img
+                src={azienda.logoDataUrl}
+                alt={t("comune.logoAlt")}
+                className="max-h-16 max-w-[180px]"
+              />
             )}
           </header>
 
@@ -165,14 +172,14 @@ function Report() {
             </div>
           </div>
 
-          <h3 className="mt-7 font-display text-[14px] font-semibold">
-            {t("rep.s3")}
-          </h3>
+          <h3 className="mt-7 font-display text-[14px] font-semibold">{t("rep.s3")}</h3>
           <table className="mt-3 w-full text-[12px]">
             <tbody>
               {SOGLIE.map((s) => (
                 <tr key={s.grado} className="border-b border-line/60">
-                  <td className="py-2 font-medium">{t("grado.label")} {s.grado}</td>
+                  <td className="py-2 font-medium">
+                    {t("grado.label")} {s.grado}
+                  </td>
                   <td className="py-2 font-mono">≥ {s.min}%</td>
                   <td className="py-2 text-mist">{t(s.stato)}</td>
                 </tr>
@@ -193,7 +200,9 @@ function Report() {
           )}
 
           <footer className="mt-10 border-t border-line pt-4 font-mono text-[10px] text-mist">
-            {t("rep.footer", { azienda: azienda.ragioneSociale || t("rep.aziendaNonImpostataMin") })}
+            {t("rep.footer", {
+              azienda: azienda.ragioneSociale || t("rep.aziendaNonImpostataMin"),
+            })}
           </footer>
         </article>
       </div>

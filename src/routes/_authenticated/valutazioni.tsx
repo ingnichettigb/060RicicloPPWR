@@ -1,9 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Intestazione } from "@/components/Intestazione";
+import { useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
+import { aziendeDiverse, esportaJson, leggiPacchetto } from "@/lib/esportazione";
 import {
   creaValutazione,
   eliminaValutazione,
+  salvaAzienda,
+  useAzienda,
   useRicaricaValutazioni,
   useValutazioni,
 } from "@/lib/archivio";
@@ -38,6 +45,42 @@ function Elenco() {
   const { valutazioni, pronto } = useValutazioni();
   const navigate = useNavigate();
   const ricarica = useRicaricaValutazioni();
+  const qc = useQueryClient();
+  const { azienda, pronto: aziendaPronta } = useAzienda();
+  const inputFile = useRef<HTMLInputElement>(null);
+
+  async function esporta(v: Valutazione) {
+    try {
+      const nome = await esportaJson(v, azienda);
+      if (nome) toast.success(t("json.esportato", { nome }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("json.errEsportazione"));
+    }
+  }
+
+  async function importa(file: File | undefined) {
+    if (inputFile.current) inputFile.current.value = "";
+    if (!file) return;
+    try {
+      const { valutazione, azienda: daFile } = await leggiPacchetto(file);
+      // nuovo ID generato dal database: nessuna sovrascrittura di schede esistenti
+      const id = await creaValutazione(valutazione);
+
+      if (daFile && aziendeDiverse(daFile, azienda)) {
+        if (confirm(t("json.chiediAzienda", { nome: daFile.ragioneSociale || "—" }))) {
+          await salvaAzienda(daFile);
+          await qc.invalidateQueries({ queryKey: ["azienda"] });
+          toast.success(t("json.aziendaAggiornata"));
+        }
+      }
+
+      await ricarica();
+      toast.success(t("json.importato", { titolo: valutazione.titolo }));
+      navigate({ to: "/valutazione/$id", params: { id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("json.errImportazione"));
+    }
+  }
 
   async function crea() {
     try {
@@ -75,13 +118,30 @@ function Elenco() {
       <div className="mx-auto max-w-[1180px] px-6 py-7">
         <Intestazione
           azione={
-            <button
-              type="button"
-              onClick={crea}
-              className="ml-2 rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
-            >
-              {t("val.nuova")}
-            </button>
+            <>
+              <input
+                ref={inputFile}
+                type="file"
+                accept=".json,application/json"
+                className="hidden"
+                onChange={(e) => importa(e.target.files?.[0])}
+              />
+              <button
+                type="button"
+                disabled={!aziendaPronta}
+                onClick={() => inputFile.current?.click()}
+                className="ml-2 rounded-lg border border-line bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper disabled:opacity-60"
+              >
+                {t("json.importa")}
+              </button>
+              <button
+                type="button"
+                onClick={crea}
+                className="rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
+              >
+                {t("val.nuova")}
+              </button>
+            </>
           }
         />
 
@@ -123,7 +183,10 @@ function Elenco() {
                 {valutazioni.map((v) => {
                   const e = calcola(v.componenti);
                   return (
-                    <tr key={v.id} className="border-b border-line/60 transition-colors hover:bg-signal/5">
+                    <tr
+                      key={v.id}
+                      className="border-b border-line/60 transition-colors hover:bg-signal/5"
+                    >
                       <td className="px-4 py-3">
                         <Link
                           to="/valutazione/$id"
@@ -151,6 +214,15 @@ function Elenco() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => esporta(v)}
+                          title={t("json.esporta")}
+                          aria-label={t("json.esporta")}
+                          className="mr-3 inline-flex translate-y-[3px] text-mist hover:text-ink"
+                        >
+                          <Download className="size-3.5" />
+                        </button>
                         <Link
                           to="/report/$id"
                           params={{ id: v.id }}

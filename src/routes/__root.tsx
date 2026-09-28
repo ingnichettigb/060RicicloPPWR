@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { LinguaProvider, useT } from "@/lib/i18n";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   const t = useT();
@@ -21,9 +22,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">{t("root.404")}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("root.404testo")}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("root.404testo")}</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -51,9 +50,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           {t("root.errTitolo")}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("root.errTesto")}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("root.errTesto")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -141,6 +138,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster position="top-center" />
     </QueryClientProvider>
   );
 }

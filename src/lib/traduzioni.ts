@@ -117,6 +117,23 @@ const it = {
   "val.errDuplica": "Duplicazione non riuscita",
   "val.revisioneIniziale": "REV 01",
 
+  // Esportazione / importazione JSON
+  "json.esporta": "Esporta JSON",
+  "json.importa": "Importa JSON",
+  "json.esportato": "File esportato: {nome}",
+  "json.importato": "Valutazione importata: {titolo}",
+  "json.chiediAzienda":
+    "Il file contiene i dati dell'azienda «{nome}», diversi da quelli attuali.\n\nVuoi aggiornare anche le impostazioni aziendali (dati e logo)?",
+  "json.aziendaAggiornata": "Impostazioni aziendali aggiornate.",
+  "json.descrizioneFile": "File di valutazione PPWR",
+  "json.errEsportazione": "Esportazione non riuscita",
+  "json.errImportazione": "Importazione non riuscita",
+  "json.errFileNonJson": "Il file non è un JSON valido.",
+  "json.errFormato": "Il file non è conforme allo standard PPWR.",
+  "json.errCampi": "Mancano titolo, data o un elenco di componenti valido.",
+  "json.errComponente": "Il componente n. {n} ha peso o indice di riciclabilità non validi.",
+  "json.errTroppoGrande": "Il file è troppo grande (max 5 MB).",
+
   // Componenti di esempio
   "demo.bottiglia": "Bottiglia",
   "demo.tappo": "Tappo",
@@ -269,6 +286,23 @@ const en: Record<Chiave, string> = {
   "val.errDuplica": "Duplication failed",
   "val.revisioneIniziale": "REV 01",
 
+  // JSON export / import
+  "json.esporta": "Export JSON",
+  "json.importa": "Import JSON",
+  "json.esportato": "File exported: {nome}",
+  "json.importato": "Assessment imported: {titolo}",
+  "json.chiediAzienda":
+    "The file contains details for the company «{nome}», which differ from the current ones.\n\nDo you also want to update the company settings (details and logo)?",
+  "json.aziendaAggiornata": "Company settings updated.",
+  "json.descrizioneFile": "PPWR assessment file",
+  "json.errEsportazione": "Export failed",
+  "json.errImportazione": "Import failed",
+  "json.errFileNonJson": "The file is not valid JSON.",
+  "json.errFormato": "The file does not comply with the PPWR standard.",
+  "json.errCampi": "Title, date or a valid list of components is missing.",
+  "json.errComponente": "Component no. {n} has an invalid weight or recyclability index.",
+  "json.errTroppoGrande": "The file is too large (max 5 MB).",
+
   "demo.bottiglia": "Bottle",
   "demo.tappo": "Cap",
   "demo.etichetta": "Label",
@@ -349,7 +383,8 @@ const de: Record<Chiave, string> = {
     "Etwas ist schiefgelaufen. Aktualisieren Sie die Seite oder kehren Sie zur Startseite zurück.",
   "root.riprova": "Erneut versuchen",
 
-  "landing.titoloPagina": "PPWR-Recyclingfähigkeit — Berechnung der Recyclingklasse von Verpackungen",
+  "landing.titoloPagina":
+    "PPWR-Recyclingfähigkeit — Berechnung der Recyclingklasse von Verpackungen",
   "landing.accedi": "App öffnen",
   "landing.kicker": "VO (EU) 2025/40 · Anhang II",
   "landing.titolo": "Recyclingfähigkeit von Verpackungen, berechnet und dokumentiert.",
@@ -392,7 +427,8 @@ const de: Record<Chiave, string> = {
   "imp.nessunLogo": "Kein Logo hochgeladen",
   "imp.carica": "Bild hochladen",
   "imp.rimuovi": "Logo entfernen",
-  "imp.logoTroppoGrande": "Das Logo ist größer als 1,5 MB: Bitte verwenden Sie eine kleinere Datei.",
+  "imp.logoTroppoGrande":
+    "Das Logo ist größer als 1,5 MB: Bitte verwenden Sie eine kleinere Datei.",
   "imp.notaLogo":
     "PNG oder JPG, max. 1,5 MB. Daten und Logo werden online gespeichert und sind auf allen Ihren Geräten verfügbar.",
 
@@ -417,6 +453,24 @@ const de: Record<Chiave, string> = {
   "val.errCrea": "Erstellung fehlgeschlagen",
   "val.errDuplica": "Duplizierung fehlgeschlagen",
   "val.revisioneIniziale": "REV 01",
+
+  // JSON-Export / -Import
+  "json.esporta": "JSON exportieren",
+  "json.importa": "JSON importieren",
+  "json.esportato": "Datei exportiert: {nome}",
+  "json.importato": "Bewertung importiert: {titolo}",
+  "json.chiediAzienda":
+    "Die Datei enthält Daten des Unternehmens «{nome}», die von den aktuellen abweichen.\n\nMöchten Sie auch die Firmeneinstellungen (Daten und Logo) aktualisieren?",
+  "json.aziendaAggiornata": "Firmeneinstellungen aktualisiert.",
+  "json.descrizioneFile": "PPWR-Bewertungsdatei",
+  "json.errEsportazione": "Export fehlgeschlagen",
+  "json.errImportazione": "Import fehlgeschlagen",
+  "json.errFileNonJson": "Die Datei ist kein gültiges JSON.",
+  "json.errFormato": "Die Datei entspricht nicht dem PPWR-Standard.",
+  "json.errCampi": "Titel, Datum oder eine gültige Komponentenliste fehlen.",
+  "json.errComponente":
+    "Komponente Nr. {n} hat ein ungültiges Gewicht oder einen ungültigen Recyclingindex.",
+  "json.errTroppoGrande": "Die Datei ist zu groß (max. 5 MB).",
 
   "demo.bottiglia": "Flasche",
   "demo.tappo": "Verschluss",
@@ -565,6 +619,24 @@ const es: Record<Chiave, string> = {
   "val.errCrea": "No se pudo crear",
   "val.errDuplica": "No se pudo duplicar",
   "val.revisioneIniziale": "REV 01",
+
+  // Exportación / importación JSON
+  "json.esporta": "Exportar JSON",
+  "json.importa": "Importar JSON",
+  "json.esportato": "Archivo exportado: {nome}",
+  "json.importato": "Evaluación importada: {titolo}",
+  "json.chiediAzienda":
+    "El archivo contiene datos de la empresa «{nome}», distintos de los actuales.\n\n¿Quieres actualizar también los ajustes de la empresa (datos y logotipo)?",
+  "json.aziendaAggiornata": "Ajustes de la empresa actualizados.",
+  "json.descrizioneFile": "Archivo de evaluación PPWR",
+  "json.errEsportazione": "No se pudo exportar",
+  "json.errImportazione": "No se pudo importar",
+  "json.errFileNonJson": "El archivo no es un JSON válido.",
+  "json.errFormato": "El archivo no cumple el estándar PPWR.",
+  "json.errCampi": "Falta el título, la fecha o una lista de componentes válida.",
+  "json.errComponente":
+    "El componente n.º {n} tiene un peso o un índice de reciclabilidad no válidos.",
+  "json.errTroppoGrande": "El archivo es demasiado grande (máx. 5 MB).",
 
   "demo.bottiglia": "Botella",
   "demo.tappo": "Tapón",

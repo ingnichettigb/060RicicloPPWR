@@ -28,7 +28,11 @@ export const Route = createFileRoute("/_authenticated/impostazioni")({
 });
 
 const campi = (t: T): { chiave: keyof Azienda; etichetta: string; placeholder: string }[] => [
-  { chiave: "ragioneSociale", etichetta: t("imp.ragioneSociale"), placeholder: t("imp.phRagioneSociale") },
+  {
+    chiave: "ragioneSociale",
+    etichetta: t("imp.ragioneSociale"),
+    placeholder: t("imp.phRagioneSociale"),
+  },
   { chiave: "partitaIva", etichetta: t("imp.partitaIva"), placeholder: t("imp.phPartitaIva") },
   { chiave: "indirizzo", etichetta: t("imp.sede"), placeholder: t("imp.phSede") },
   { chiave: "referente", etichetta: t("imp.referente"), placeholder: t("imp.phReferente") },
@@ -77,9 +81,7 @@ function Impostazioni() {
           <h1 className="font-display text-[19px] font-semibold leading-tight">
             {t("imp.titolo")}
           </h1>
-          <span className="font-mono text-[11px] text-mist">
-            {t("imp.sotto")}
-          </span>
+          <span className="font-mono text-[11px] text-mist">{t("imp.sotto")}</span>
         </div>
 
         <div className="rise mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_352px]">
@@ -115,7 +117,11 @@ function Impostazioni() {
             </div>
             <div className="mt-3 grid h-28 place-items-center rounded-lg border border-dashed border-line bg-paper">
               {form.logoDataUrl ? (
-                <img src={form.logoDataUrl} alt={t("comune.logoAlt")} className="max-h-24 max-w-[80%]" />
+                <img
+                  src={form.logoDataUrl}
+                  alt={t("comune.logoAlt")}
+                  className="max-h-24 max-w-[80%]"
+                />
               ) : (
                 <span className="text-[11px] text-mist">{t("imp.nessunLogo")}</span>
               )}

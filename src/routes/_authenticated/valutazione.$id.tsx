@@ -2,9 +2,19 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Intestazione } from "@/components/Intestazione";
+import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
-import { aggiornaValutazione, useValutazione } from "@/lib/archivio";
-import { calcola, etichettaEsito, nuovoId, num, SOGLIE, type Componente, type Valutazione } from "@/lib/ppwr";
+import { esportaJson } from "@/lib/esportazione";
+import { aggiornaValutazione, useAzienda, useValutazione } from "@/lib/archivio";
+import {
+  calcola,
+  etichettaEsito,
+  nuovoId,
+  num,
+  SOGLIE,
+  type Componente,
+  type Valutazione,
+} from "@/lib/ppwr";
 
 export const Route = createFileRoute("/_authenticated/valutazione/$id")({
   head: () => ({
@@ -18,7 +28,8 @@ export const Route = createFileRoute("/_authenticated/valutazione/$id")({
       { property: "og:title", content: "Editor valutazione — Riciclabilità PPWR" },
       {
         property: "og:description",
-        content: "Bilancio di massa e attribuzione del grado di prestazione secondo Reg. UE 2025/40.",
+        content:
+          "Bilancio di massa e attribuzione del grado di prestazione secondo Reg. UE 2025/40.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -32,9 +43,12 @@ function Editor() {
   useTitoloPagina("ed.titoloPagina");
   const { id } = useParams({ from: "/_authenticated/valutazione/$id" });
   const { data, isLoading } = useValutazione(id);
+  const { azienda } = useAzienda();
   const qc = useQueryClient();
   const [v, setV] = useState<Valutazione | null>(null);
-  const [stato, setStato] = useState<"salvato" | "modificato" | "salvataggio" | "errore">("salvato");
+  const [stato, setStato] = useState<"salvato" | "modificato" | "salvataggio" | "errore">(
+    "salvato",
+  );
   const primo = useRef(true);
 
   useEffect(() => {
@@ -67,13 +81,25 @@ function Editor() {
       <div className="min-h-screen bg-paper text-ink">
         <div className="mx-auto max-w-[1180px] px-6 py-7">
           <Intestazione />
-          <p className="mt-10 text-[13px] text-mist">{isLoading ? t("comune.caricamento") : t("comune.nonTrovata")}</p>
+          <p className="mt-10 text-[13px] text-mist">
+            {isLoading ? t("comune.caricamento") : t("comune.nonTrovata")}
+          </p>
         </div>
       </div>
     );
   }
 
   const esito = calcola(v.componenti);
+
+  async function esportaFile() {
+    if (!v) return;
+    try {
+      const nome = await esportaJson(v, azienda);
+      if (nome) toast.success(t("json.esportato", { nome }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("json.errEsportazione"));
+    }
+  }
 
   function aggiorna(cid: string, campo: keyof Componente, valore: string) {
     setV((prev) =>
@@ -116,22 +142,30 @@ function Editor() {
     );
   }
 
-  const input =
-    "w-full bg-transparent outline-none focus:bg-signal/5 rounded px-1 py-0.5 -mx-1";
+  const input = "w-full bg-transparent outline-none focus:bg-signal/5 rounded px-1 py-0.5 -mx-1";
 
   return (
     <div className="min-h-screen bg-paper text-ink">
       <div className="mx-auto max-w-[1180px] px-6 py-7">
         <Intestazione
           azione={
-            <Link
-              to="/report/$id"
-              params={{ id: v.id }}
-              className="ml-2 inline-flex items-center gap-1.5 rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
-            >
-              <span className="inline-block size-3 shrink-0 rounded-[2px] border border-white/70" />
-              {t("ed.esporta")}
-            </Link>
+            <>
+              <button
+                type="button"
+                onClick={esportaFile}
+                className="ml-2 rounded-lg border border-line bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper"
+              >
+                {t("json.esporta")}
+              </button>
+              <Link
+                to="/report/$id"
+                params={{ id: v.id }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
+              >
+                <span className="inline-block size-3 shrink-0 rounded-[2px] border border-white/70" />
+                {t("ed.esporta")}
+              </Link>
+            </>
           }
         />
 
@@ -146,8 +180,14 @@ function Editor() {
             onChange={(e) => setV({ ...v, revisione: e.target.value })}
             className="w-24 rounded px-1 font-mono text-[11px] text-mist outline-none focus:bg-signal/5"
           />
-          <span className={`font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}>
-            {stato === "salvato" ? t("ed.salvato") : stato === "errore" ? t("ed.errSalvataggio") : t("ed.salvataggio")}
+          <span
+            className={`font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
+          >
+            {stato === "salvato"
+              ? t("ed.salvato")
+              : stato === "errore"
+                ? t("ed.errSalvataggio")
+                : t("ed.salvataggio")}
           </span>
           <input
             type="date"
@@ -269,7 +309,10 @@ function Editor() {
                   </span>
                 </div>
                 <div className="mt-1.5 text-[12px] text-mist">
-                  {t("ed.gRiciclabili", { m: num(esito.massaRiciclabile), t: num(esito.pesoTotale) })}
+                  {t("ed.gRiciclabili", {
+                    m: num(esito.massaRiciclabile),
+                    t: num(esito.pesoTotale),
+                  })}
                 </div>
 
                 <div className="mt-5">
@@ -287,8 +330,7 @@ function Editor() {
                     <span className="absolute left-[95%] -translate-x-1/2">95%</span>
                   </div>
                   <div className="mt-1 text-[11px] text-mist">
-                    {t("ed.sogliaMin")}{" "}
-                    <span className="font-medium text-ink">≥ 70%</span>
+                    {t("ed.sogliaMin")} <span className="font-medium text-ink">≥ 70%</span>
                   </div>
                 </div>
 
@@ -315,7 +357,9 @@ function Editor() {
               <div className="mt-3 space-y-2 text-[12px]">
                 {SOGLIE.map((s) => (
                   <div key={s.grado} className="flex justify-between font-mono tabular-nums">
-                    <span className="text-mist">{t("grado.label")} {s.grado}</span>
+                    <span className="text-mist">
+                      {t("grado.label")} {s.grado}
+                    </span>
                     <span className={esito.grado === s.grado ? "text-signal" : ""}>≥ {s.min}%</span>
                   </div>
                 ))}
