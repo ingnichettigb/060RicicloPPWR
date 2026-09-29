@@ -187,6 +187,18 @@ const it = {
   "rep.s4": "4. Note tecniche",
   "rep.footer":
     "Documento generato per il fascicolo tecnico di cui all'Allegato VII del Reg. (UE) 2025/40 — {azienda}",
+  "ed.etNome": "Nome imballaggio / prodotto",
+  "ed.phNome": "es. Bottiglia in vetro, Tubetto dentifricio, Flacone PET 500 ml",
+  "ed.etRevisione": "Revisione",
+  "ed.etData": "Data",
+  "ed.salva": "Salva",
+  "ed.salvataggioOk": "Valutazione salvata con successo!",
+  "ed.chiediNomeTitolo": "Assegna un nome alla valutazione",
+  "ed.chiediNomeTesto":
+    "Per archiviare correttamente la scheda, inserisci il nome del manufatto o imballaggio analizzato:",
+  "ed.annulla": "Annulla",
+  "ed.confermaSalva": "Conferma e salva",
+  "ed.nomeObbligatorio": "Inserisci un nome diverso da «Nuova valutazione».",
 };
 
 export type Chiave = keyof typeof it;
@@ -353,6 +365,18 @@ const en: Record<Chiave, string> = {
   "rep.s4": "4. Technical notes",
   "rep.footer":
     "Document generated for the technical file referred to in Annex VII of Reg. (EU) 2025/40 — {azienda}",
+  "ed.etNome": "Packaging / product name",
+  "ed.phNome": "e.g. Glass bottle, Toothpaste tube, 500 ml PET bottle",
+  "ed.etRevisione": "Revision",
+  "ed.etData": "Date",
+  "ed.salva": "Save",
+  "ed.salvataggioOk": "Assessment saved successfully!",
+  "ed.chiediNomeTitolo": "Give the assessment a name",
+  "ed.chiediNomeTesto":
+    "To file the record correctly, enter the name of the packaging or product analysed:",
+  "ed.annulla": "Cancel",
+  "ed.confermaSalva": "Confirm and save",
+  "ed.nomeObbligatorio": "Please enter a name other than “New assessment”.",
 };
 
 const de: Record<Chiave, string> = {
@@ -522,6 +546,18 @@ const de: Record<Chiave, string> = {
   "rep.s4": "4. Technische Hinweise",
   "rep.footer":
     "Dokument erstellt für die technische Dokumentation gemäß Anhang VII der VO (EU) 2025/40 — {azienda}",
+  "ed.etNome": "Name der Verpackung / des Produkts",
+  "ed.phNome": "z. B. Glasflasche, Zahnpastatube, PET-Flasche 500 ml",
+  "ed.etRevisione": "Revision",
+  "ed.etData": "Datum",
+  "ed.salva": "Speichern",
+  "ed.salvataggioOk": "Bewertung erfolgreich gespeichert!",
+  "ed.chiediNomeTitolo": "Geben Sie der Bewertung einen Namen",
+  "ed.chiediNomeTesto":
+    "Bitte geben Sie den Namen der analysierten Verpackung oder des Produkts ein, damit das Datenblatt korrekt archiviert wird:",
+  "ed.annulla": "Abbrechen",
+  "ed.confermaSalva": "Bestätigen und speichern",
+  "ed.nomeObbligatorio": "Bitte geben Sie einen anderen Namen als „Neue Bewertung“ ein.",
 };
 
 const es: Record<Chiave, string> = {
@@ -688,6 +724,18 @@ const es: Record<Chiave, string> = {
   "rep.s4": "4. Notas técnicas",
   "rep.footer":
     "Documento generado para el expediente técnico previsto en el Anexo VII del Reg. (UE) 2025/40 — {azienda}",
+  "ed.etNome": "Nombre del envase / producto",
+  "ed.phNome": "p. ej. Botella de vidrio, Tubo de dentífrico, Frasco PET 500 ml",
+  "ed.etRevisione": "Revisión",
+  "ed.etData": "Fecha",
+  "ed.salva": "Guardar",
+  "ed.salvataggioOk": "¡Evaluación guardada correctamente!",
+  "ed.chiediNomeTitolo": "Asigna un nombre a la evaluación",
+  "ed.chiediNomeTesto":
+    "Para archivar correctamente la ficha, introduce el nombre del envase o producto analizado:",
+  "ed.annulla": "Cancelar",
+  "ed.confermaSalva": "Confirmar y guardar",
+  "ed.nomeObbligatorio": "Introduce un nombre distinto de «Nueva evaluación».",
 };
 
 export const TRADUZIONI: Record<Lingua, Record<Chiave, string>> = { it, en, de, es };
