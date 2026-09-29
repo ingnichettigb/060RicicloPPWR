@@ -143,7 +143,7 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
     const rTitolo = righe(t("rep.titolo"), fb, 26, CW);
     const rProdotto = righe(v.titolo, fb, 24, CW);
     const dl = logoProgramma.scaleToFit(140, 140);
-    const totale = 21 + 80 + rTitolo.length * 32 + rProdotto.length * 30 + 6 + dl.height;
+    const totale = 21 + 68 + rTitolo.length * 32 + rProdotto.length * 30 + 6 + dl.height;
     const sopra = fondoTesta - 20;
     const sotto = yb + hb + 20;
     const slack = Math.max(0, sopra - sotto - totale);
@@ -156,8 +156,7 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
       centrato(p, r, y, { font: fb, size: 26, color: SIGNAL });
       y -= 32;
     }
-    testo(p, `${v.revisione} · ${v.data}`, M, y + 4, { size: 11, color: MIST });
-    y -= 40;
+    y -= 28;
 
     // Nome del prodotto/imballaggio in evidenza, centrato, sopra il logo del programma
     for (const r of rProdotto) {
@@ -166,6 +165,9 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
     }
     y -= 6;
     p.drawImage(logoProgramma, { x: (W - dl.width) / 2, y: y - dl.height, width: dl.width, height: dl.height });
+
+    // Revisione e data in fondo alla pagina, a sinistra
+    testo(p, `${v.revisione} · ${v.data}`, M, 50, { size: 11, color: MIST });
 
     const colore = e.conforme ? SIGNAL : DANGER;
     p.drawRectangle({

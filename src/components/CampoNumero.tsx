@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLingua } from "@/lib/i18n";
-import { aTesto, daTesto, separatoreDecimale, testoValido } from "@/lib/numeri";
+import { aTesto, daTesto, normalizzaTesto, separatoreDecimale, testoValido } from "@/lib/numeri";
 
 type Props = {
   value: number;
@@ -12,8 +12,8 @@ type Props = {
 };
 
 /**
- * Campo numerico con un solo separatore decimale (quello della lingua) e al massimo due decimali.
- * I caratteri non ammessi vengono ignorati; a campo lasciato il numero è mostrato con due decimali.
+ * Campo numerico: accetta punto o virgola e mostra sempre il separatore della lingua, con al massimo
+ * due decimali (le cifre in più vengono tolte). A campo lasciato il numero è mostrato con due decimali.
  */
 export function CampoNumero({ value, onChange, max, className, ariaLabel }: Props) {
   const { lingua } = useLingua();
@@ -37,8 +37,7 @@ export function CampoNumero({ value, onChange, max, className, ariaLabel }: Prop
       onFocus={(e) => e.currentTarget.select()}
       onBlur={() => setTesto(aTesto(daTesto(testo, sep), sep))}
       onChange={(e) => {
-        const nuovo = e.target.value;
-        if (!testoValido(nuovo, sep)) return;
+        const nuovo = normalizzaTesto(e.target.value, sep);
         const n = daTesto(nuovo, sep);
         if (max !== undefined && n > max) return;
         setTesto(nuovo);
