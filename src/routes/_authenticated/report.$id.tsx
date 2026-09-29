@@ -55,7 +55,10 @@ function Report() {
           azione={
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={async () => {
+                const { scaricaPdf } = await import("@/lib/pdfReport");
+                await scaricaPdf({ t, azienda, v, e });
+              }}
               className="ml-2 rounded-lg border-[1.5px] border-signal bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground"
             >
               {t("rep.stampa")}
