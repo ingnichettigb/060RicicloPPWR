@@ -108,7 +108,8 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
   {
     const p = pdf.addPage([W, H]);
     p.drawRectangle({ x: 0, y: H - 14, width: W, height: 14, color: SIGNAL });
-    let y = H - 62;
+    const yTesta = H - 62;
+    let y = yTesta;
     if (logo) {
       const d = logo.scaleToFit(200, 80);
       y -= d.height;
@@ -116,29 +117,56 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
       y -= 26;
     }
     testo(p, nomeAzienda, M, y, { font: fb, size: 15 });
+    let fondoTesta = y - 14;
 
-    y -= 44;
-    p.drawRectangle({ x: M, y: y + 18, width: 40, height: 3, color: SIGNAL });
-    testo(p, t("rep.norma").toUpperCase(), M, y, { font: fb, size: 9, color: SIGNAL });
+    // Dati aziendali in alto a destra, all'altezza di logo e nome dell'azienda
+    const dati = [
+      azienda.indirizzo,
+      azienda.partitaIva && t("rep.piva", { v: azienda.partitaIva }),
+      azienda.referente,
+      azienda.email,
+    ].filter(Boolean) as string[];
+    let yd = logo ? yTesta - 9 : yTesta;
+    for (const d of dati) {
+      for (const r of righe(d, f, 9.5, 230)) {
+        testo(p, r, W - M, yd, { size: 9.5, color: MIST, dx: true });
+        yd -= 15;
+      }
+    }
+    fondoTesta = Math.min(fondoTesta, yd + 15 - 10);
+
+    // Riquadro con la percentuale, in basso
+    const hb = 86;
+    const yb = 110;
+
+    // Blocco centrale, centrato in verticale tra testata e riquadro
+    const rTitolo = righe(t("rep.titolo"), fb, 26, CW);
+    const rProdotto = righe(v.titolo, fb, 24, CW);
+    const dl = logoProgramma.scaleToFit(140, 140);
+    const totale = 21 + 80 + rTitolo.length * 32 + rProdotto.length * 30 + 6 + dl.height;
+    const sopra = fondoTesta - 20;
+    const sotto = yb + hb + 20;
+    const slack = Math.max(0, sopra - sotto - totale);
+    y = sopra - slack / 2 - 21;
+
+    p.drawRectangle({ x: (W - 40) / 2, y: y + 18, width: 40, height: 3, color: SIGNAL });
+    centrato(p, t("rep.norma").toUpperCase(), y, { font: fb, size: 9, color: SIGNAL });
     y -= 40;
-    for (const r of righe(t("rep.titolo"), fb, 26, CW)) {
-      testo(p, r, M, y, { font: fb, size: 26 });
+    for (const r of rTitolo) {
+      centrato(p, r, y, { font: fb, size: 26, color: SIGNAL });
       y -= 32;
     }
     testo(p, `${v.revisione} · ${v.data}`, M, y + 4, { size: 11, color: MIST });
     y -= 40;
 
     // Nome del prodotto/imballaggio in evidenza, centrato, sopra il logo del programma
-    for (const r of righe(v.titolo, fb, 24, CW)) {
+    for (const r of rProdotto) {
       centrato(p, r, y, { font: fb, size: 24 });
       y -= 30;
     }
     y -= 6;
-    const dl = logoProgramma.scaleToFit(140, 140);
     p.drawImage(logoProgramma, { x: (W - dl.width) / 2, y: y - dl.height, width: dl.width, height: dl.height });
 
-    const hb = 86;
-    const yb = 196;
     const colore = e.conforme ? SIGNAL : DANGER;
     p.drawRectangle({
       x: M,
@@ -162,21 +190,6 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
       size: 9.5,
       color: MIST,
     });
-
-    // Dati aziendali in fondo alla copertina
-    const dati = [
-      azienda.indirizzo,
-      azienda.partitaIva && t("rep.piva", { v: azienda.partitaIva }),
-      azienda.referente,
-      azienda.email,
-    ].filter(Boolean) as string[];
-    let yd = 150;
-    p.drawLine({ start: { x: M, y: yd + 22 }, end: { x: W - M, y: yd + 22 }, thickness: 1, color: LINE });
-    testo(p, nomeAzienda, M, yd, { font: fb, size: 11 });
-    for (const d of dati) {
-      yd -= 15;
-      testo(p, d, M, yd, { size: 9.5, color: MIST });
-    }
   }
 
   // ───────────── Pagine di contenuto ─────────────
