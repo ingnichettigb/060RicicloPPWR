@@ -1,5 +1,8 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import type { T } from "@/lib/i18n";
+import { LOGO_PROGRAMMA_B64 } from "@/lib/logoProgramma";
+import { LOCALE } from "@/lib/traduzioni";
+import { getLingua } from "@/lib/i18n";
 import { etichettaEsito, num, SOGLIE, type Azienda, type Esito, type Valutazione } from "@/lib/ppwr";
 
 export type DatiReport = { t: T; azienda: Azienda; v: Valutazione; e: Esito };
@@ -66,6 +69,27 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
     p.drawText(c, { x: px, y, font, size, color: o.color ?? INK });
   };
 
+  const centrato = (
+    pg: PDFPage,
+    s: string,
+    yy: number,
+    o: { font?: PDFFont; size?: number; color?: ReturnType<typeof rgb> } = {},
+  ) => {
+    const font = o.font ?? f;
+    const size = o.size ?? 10;
+    testo(pg, s, (W - font.widthOfTextAtSize(safe(s), size)) / 2, yy, o);
+  };
+
+  // Data di generazione del PDF, nel formato della lingua corrente.
+  const dataOggi = new Date().toLocaleDateString(LOCALE[getLingua()], {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  // Logo del programma, sempre incorporato.
+  const logoProgramma = await pdf.embedJpg(Uint8Array.from(atob(LOGO_PROGRAMMA_B64), (ch) => ch.charCodeAt(0)));
+
   // Logo (PNG o JPG); altri formati vengono ignorati.
   let logo: Awaited<ReturnType<typeof pdf.embedPng>> | null = null;
   const m = /^data:image\/(png|jpe?g);base64,(.+)$/i.exec(azienda.logoDataUrl || "");
@@ -93,23 +117,28 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
     }
     testo(p, nomeAzienda, M, y, { font: fb, size: 15 });
 
-    y = H * 0.6;
+    y -= 44;
     p.drawRectangle({ x: M, y: y + 18, width: 40, height: 3, color: SIGNAL });
     testo(p, t("rep.norma").toUpperCase(), M, y, { font: fb, size: 9, color: SIGNAL });
     y -= 40;
-    for (const r of righe(t("rep.titolo"), fb, 28, CW)) {
-      testo(p, r, M, y, { font: fb, size: 28 });
-      y -= 34;
+    for (const r of righe(t("rep.titolo"), fb, 26, CW)) {
+      testo(p, r, M, y, { font: fb, size: 26 });
+      y -= 32;
+    }
+    testo(p, `${v.revisione} · ${v.data}`, M, y + 4, { size: 11, color: MIST });
+    y -= 40;
+
+    // Nome del prodotto/imballaggio in evidenza, centrato, sopra il logo del programma
+    for (const r of righe(v.titolo, fb, 24, CW)) {
+      centrato(p, r, y, { font: fb, size: 24 });
+      y -= 30;
     }
     y -= 6;
-    for (const r of righe(v.titolo, f, 16, CW)) {
-      testo(p, r, M, y, { size: 16 });
-      y -= 21;
-    }
-    testo(p, `${v.revisione} · ${v.data}`, M, y - 4, { size: 11, color: MIST });
+    const dl = logoProgramma.scaleToFit(140, 140);
+    p.drawImage(logoProgramma, { x: (W - dl.width) / 2, y: y - dl.height, width: dl.width, height: dl.height });
 
     const hb = 86;
-    const yb = H * 0.28;
+    const yb = 196;
     const colore = e.conforme ? SIGNAL : DANGER;
     p.drawRectangle({
       x: M,
@@ -138,7 +167,7 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
     const dati = [
       azienda.indirizzo,
       azienda.partitaIva && t("rep.piva", { v: azienda.partitaIva }),
-      azienda.referente && t("rep.referente", { v: azienda.referente }),
+      azienda.referente,
       azienda.email,
     ].filter(Boolean) as string[];
     let yd = 150;
@@ -311,10 +340,9 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
   etichetta(t("rep.luogo"), M, y);
   etichetta(t("rep.data"), M + 270, y);
   campo("luogo", M, y - 30, 240);
-  campo("data", M + 270, y - 30, 150);
+  campo("data", M + 270, y - 30, 150, dataOggi);
 
   y -= 30 + 34;
-  etichetta(t("imp.referente"), M, y);
   campo("referente", M, y - 30, 240, azienda.referente);
   testo(p, nomeAzienda, M, y - 44, { size: 9, color: MIST });
   etichetta(t("rep.firma"), M + 270, y);
