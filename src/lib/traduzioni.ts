@@ -167,6 +167,7 @@ const it = {
   // Report
   "rep.titoloPagina": "Report di riciclabilità — Riciclabilità PPWR",
   "rep.stampa": "Scarica PDF",
+  "ed.notaNumeri": "Numeri: usa la virgola come separatore decimale (es. 2,5), al massimo due decimali. Peso in grammi; % riciclabile da 0 a 100.",
   "rep.generazione": "Generazione dell'anteprima…",
   "rep.errPdf": "Impossibile generare l'anteprima del PDF.",
   "rep.errScarica": "Impossibile generare il PDF.",
@@ -355,6 +356,7 @@ const en: Record<Chiave, string> = {
 
   "rep.titoloPagina": "Recyclability report — PPWR Recyclability",
   "rep.stampa": "Download PDF",
+  "ed.notaNumeri": "Numbers: use the point as decimal separator (e.g. 2.5), at most two decimals. Weight in grams; recyclable % from 0 to 100.",
   "rep.generazione": "Generating preview…",
   "rep.errPdf": "Unable to generate the PDF preview.",
   "rep.errScarica": "Unable to generate the PDF.",
@@ -546,6 +548,7 @@ const de: Record<Chiave, string> = {
 
   "rep.titoloPagina": "Recyclingfähigkeitsbericht — PPWR-Recyclingfähigkeit",
   "rep.stampa": "PDF herunterladen",
+  "ed.notaNumeri": "Zahlen: Komma als Dezimaltrennzeichen verwenden (z. B. 2,5), höchstens zwei Nachkommastellen. Gewicht in Gramm; recycelbarer Anteil von 0 bis 100 %.",
   "rep.generazione": "Vorschau wird erstellt…",
   "rep.errPdf": "Die PDF-Vorschau konnte nicht erstellt werden.",
   "rep.errScarica": "Das PDF konnte nicht erstellt werden.",
@@ -734,6 +737,7 @@ const es: Record<Chiave, string> = {
 
   "rep.titoloPagina": "Informe de reciclabilidad — Reciclabilidad PPWR",
   "rep.stampa": "Descargar PDF",
+  "ed.notaNumeri": "Números: usa la coma como separador decimal (p. ej. 2,5), como máximo dos decimales. Peso en gramos; % reciclable de 0 a 100.",
   "rep.generazione": "Generando la vista previa…",
   "rep.errPdf": "No se pudo generar la vista previa del PDF.",
   "rep.errScarica": "No se pudo generar el PDF.",

@@ -211,8 +211,8 @@ export async function leggiPacchetto(file: File): Promise<{
       id: nuovoId(),
       nome: testo(c["nome"], 200),
       materiale: testo(c["materiale"], 200),
-      peso,
-      indice,
+      peso: Math.round(peso * 100) / 100,
+      indice: Math.round(indice * 100) / 100,
     };
   });
 

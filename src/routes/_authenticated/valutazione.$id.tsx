@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { Intestazione } from "@/components/Intestazione";
+import { CampoNumero } from "@/components/CampoNumero";
 import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
 import { LINGUE, TRADUZIONI } from "@/lib/traduzioni";
@@ -106,22 +107,23 @@ function Editor() {
     }
   }
 
-  function aggiorna(cid: string, campo: keyof Componente, valore: string) {
+  function aggiorna(cid: string, campo: "nome" | "materiale", valore: string) {
     setV((prev) =>
       prev
         ? {
             ...prev,
-            componenti: prev.componenti.map((c) =>
-              c.id === cid
-                ? {
-                    ...c,
-                    [campo]:
-                      campo === "peso" || campo === "indice"
-                        ? Number(valore.replace(",", ".")) || 0
-                        : valore,
-                  }
-                : c,
-            ),
+            componenti: prev.componenti.map((c) => (c.id === cid ? { ...c, [campo]: valore } : c)),
+          }
+        : prev,
+    );
+  }
+
+  function aggiornaNum(cid: string, campo: "peso" | "indice", valore: number) {
+    setV((prev) =>
+      prev
+        ? {
+            ...prev,
+            componenti: prev.componenti.map((c) => (c.id === cid ? { ...c, [campo]: valore } : c)),
           }
         : prev,
     );
@@ -347,16 +349,19 @@ function Editor() {
                       />
                     </td>
                     <td className="px-3 py-2.5 text-right">
-                      <input
+                      <CampoNumero
                         value={c.peso}
-                        onChange={(e) => aggiorna(c.id, "peso", e.target.value)}
+                        onChange={(n) => aggiornaNum(c.id, "peso", n)}
+                        ariaLabel={t("ed.colPeso")}
                         className={`${input} text-right`}
                       />
                     </td>
                     <td className="px-3 py-2.5 text-right">
-                      <input
+                      <CampoNumero
                         value={c.indice}
-                        onChange={(e) => aggiorna(c.id, "indice", e.target.value)}
+                        max={100}
+                        onChange={(n) => aggiornaNum(c.id, "indice", n)}
+                        ariaLabel={t("ed.colPercRicic")}
                         className={`${input} text-right`}
                       />
                     </td>
@@ -398,6 +403,7 @@ function Editor() {
               >
                 {t("ed.aggiungi")}
               </button>
+              <p className="mt-3 text-[11px] leading-relaxed text-mist">{t("ed.notaNumeri")}</p>
             </div>
           </div>
 
