@@ -167,6 +167,9 @@ const it = {
   // Report
   "rep.titoloPagina": "Report di riciclabilità — Riciclabilità PPWR",
   "rep.stampa": "Scarica PDF",
+  "rep.apriPdf": "Apri il PDF in una nuova scheda",
+  "rep.generazione": "Generazione dell'anteprima…",
+  "rep.errPdf": "Impossibile generare l'anteprima del PDF.",
   "rep.norma": "Regolamento (UE) 2025/40 (PPWR)",
   "rep.firmaTitolo": "Luogo, data e firma",
   "rep.luogo": "Luogo",
@@ -351,6 +354,9 @@ const en: Record<Chiave, string> = {
 
   "rep.titoloPagina": "Recyclability report — PPWR Recyclability",
   "rep.stampa": "Download PDF",
+  "rep.apriPdf": "Open the PDF in a new tab",
+  "rep.generazione": "Generating preview…",
+  "rep.errPdf": "Unable to generate the PDF preview.",
   "rep.norma": "Regulation (EU) 2025/40 (PPWR)",
   "rep.firmaTitolo": "Place, date and signature",
   "rep.luogo": "Place",
@@ -538,6 +544,9 @@ const de: Record<Chiave, string> = {
 
   "rep.titoloPagina": "Recyclingfähigkeitsbericht — PPWR-Recyclingfähigkeit",
   "rep.stampa": "PDF herunterladen",
+  "rep.apriPdf": "PDF in neuem Tab öffnen",
+  "rep.generazione": "Vorschau wird erstellt…",
+  "rep.errPdf": "Die PDF-Vorschau konnte nicht erstellt werden.",
   "rep.norma": "Verordnung (EU) 2025/40 (PPWR)",
   "rep.firmaTitolo": "Ort, Datum und Unterschrift",
   "rep.luogo": "Ort",
@@ -722,6 +731,9 @@ const es: Record<Chiave, string> = {
 
   "rep.titoloPagina": "Informe de reciclabilidad — Reciclabilidad PPWR",
   "rep.stampa": "Descargar PDF",
+  "rep.apriPdf": "Abrir el PDF en una pestaña nueva",
+  "rep.generazione": "Generando la vista previa…",
+  "rep.errPdf": "No se pudo generar la vista previa del PDF.",
   "rep.norma": "Reglamento (UE) 2025/40 (PPWR)",
   "rep.firmaTitolo": "Lugar, fecha y firma",
   "rep.luogo": "Lugar",
