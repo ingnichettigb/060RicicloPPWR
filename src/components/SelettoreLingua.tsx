@@ -8,7 +8,7 @@ export function SelettoreLingua() {
     <div
       role="group"
       aria-label={t("lingua.etichetta")}
-      className="no-print inline-flex items-center rounded-lg border border-line bg-white p-0.5 font-mono text-[11px]"
+      className="no-print inline-flex items-center rounded-lg border-[1.5px] border-signal bg-white p-0.5 font-mono text-[11px]"
     >
       {LINGUE.map((l) => (
         <button

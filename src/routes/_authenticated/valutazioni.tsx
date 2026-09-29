@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/valutazioni")({
 });
 
 const azioneRiga =
-  "inline-grid size-8 place-items-center rounded-md text-mist transition-colors hover:bg-ink/5 hover:text-ink";
+  "inline-grid size-8 place-items-center rounded-lg border-[1.5px] border-signal bg-white text-mist transition-colors hover:bg-ink/5 hover:text-ink";
 
 function Elenco() {
   const t = useT();
@@ -133,14 +133,14 @@ function Elenco() {
                 type="button"
                 disabled={!aziendaPronta}
                 onClick={() => inputFile.current?.click()}
-                className="ml-2 rounded-lg border border-line bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper disabled:opacity-60"
+                className="ml-2 rounded-lg border-[1.5px] border-signal bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper disabled:opacity-60"
               >
                 {t("json.importa")}
               </button>
               <button
                 type="button"
                 onClick={crea}
-                className="rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
+                className="rounded-lg border-[1.5px] border-signal bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground"
               >
                 {t("val.nuova")}
               </button>
