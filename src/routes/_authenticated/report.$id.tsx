@@ -33,28 +33,27 @@ function Report() {
   const { id } = useParams({ from: "/_authenticated/report/$id" });
   const { azienda } = useAzienda();
   const { data: v, isLoading } = useValutazione(id);
-  const [anteprima, setAnteprima] = useState<{ url: string } | { errore: true } | null>(null);
+  const [pagine, setPagine] = useState<string[] | "errore" | null>(null);
 
-  // L'anteprima è il PDF vero, generato con lo stesso codice del download.
+  // L'anteprima è il PDF vero (stesso codice del download), mostrato pagina per pagina come immagini.
   useEffect(() => {
     if (!v) return;
     let annullato = false;
-    let url = "";
-    setAnteprima(null);
+    setPagine(null);
     (async () => {
       try {
         const { generaPdf } = await import("@/lib/pdfReport");
+        const { pagineComeImmagini } = await import("@/lib/anteprimaPdf");
         const blob = await generaPdf({ t, azienda, v, e: calcola(v.componenti) });
-        if (annullato) return;
-        url = URL.createObjectURL(blob);
-        setAnteprima({ url });
-      } catch {
-        if (!annullato) setAnteprima({ errore: true });
+        const immagini = await pagineComeImmagini(blob, () => annullato);
+        if (!annullato) setPagine(immagini);
+      } catch (err) {
+        console.error("Anteprima PDF non riuscita", err);
+        if (!annullato) setPagine("errore");
       }
     })();
     return () => {
       annullato = true;
-      if (url) URL.revokeObjectURL(url);
     };
   }, [v, azienda, lingua]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -79,8 +78,13 @@ function Report() {
             <button
               type="button"
               onClick={async () => {
-                const { scaricaPdf } = await import("@/lib/pdfReport");
-                await scaricaPdf({ t, azienda, v, e: calcola(v.componenti) });
+                try {
+                  const { scaricaPdf } = await import("@/lib/pdfReport");
+                  await scaricaPdf({ t, azienda, v, e: calcola(v.componenti) });
+                } catch (err) {
+                  console.error("Download PDF non riuscito", err);
+                  window.alert(t("rep.errScarica"));
+                }
               }}
               className="ml-2 rounded-lg border-[1.5px] border-signal bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground"
             >
@@ -100,28 +104,23 @@ function Report() {
           >
             {t("rep.torna")}
           </Link>
-          {anteprima && "url" in anteprima && (
-            <a
-              href={anteprima.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-[11px] text-signal underline"
-            >
-              {t("rep.apriPdf")}
-            </a>
-          )}
         </div>
 
-        <div className="mx-auto mt-5 max-w-[900px] overflow-hidden rounded-xl bg-white ring-1 ring-black/5">
-          {anteprima && "url" in anteprima ? (
-            <iframe
-              title={t("rep.anteprima")}
-              src={`${anteprima.url}#view=FitH`}
-              className="block h-[82vh] min-h-[560px] w-full border-0"
-            />
+        <p className="mt-2 max-w-[900px] text-[12px] text-mist">{t("rep.notaAnteprima")}</p>
+
+        <div className="mx-auto mt-4 flex max-w-[900px] flex-col gap-4">
+          {Array.isArray(pagine) ? (
+            pagine.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`${t("rep.anteprima")} ${i + 1}`}
+                className="block h-auto w-full rounded-lg bg-white ring-1 ring-black/10"
+              />
+            ))
           ) : (
-            <p className="grid h-[40vh] place-items-center px-6 text-center text-[13px] text-mist">
-              {anteprima ? t("rep.errPdf") : t("rep.generazione")}
+            <p className="grid h-[40vh] place-items-center rounded-xl bg-white px-6 text-center text-[13px] text-mist ring-1 ring-black/5">
+              {pagine === "errore" ? t("rep.errPdf") : t("rep.generazione")}
             </p>
           )}
         </div>
