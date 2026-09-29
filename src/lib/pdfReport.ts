@@ -363,13 +363,21 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
-function nomeFile(v: Valutazione) {
+/** AAMMGGHHmm-report-PPWR-{titolo}-{revisione}.pdf  (ora locale, come il nome del file JSON) */
+export function nomeFile(v: Valutazione, quando = new Date()) {
+  const due = (n: number) => String(n).padStart(2, "0");
+  const stamp =
+    due(quando.getFullYear() % 100) +
+    due(quando.getMonth() + 1) +
+    due(quando.getDate()) +
+    due(quando.getHours()) +
+    due(quando.getMinutes());
   const base = `${v.titolo}-${v.revisione}`
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return `report-${base || "riciclabilita"}.pdf`;
+  return `${stamp}-report-PPWR-${base || "riciclabilita"}.pdf`;
 }
 
 /** Genera il PDF e ne avvia il download nel browser. */
