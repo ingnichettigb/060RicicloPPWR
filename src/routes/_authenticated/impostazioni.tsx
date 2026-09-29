@@ -126,7 +126,7 @@ function Impostazioni() {
                 <span className="text-[11px] text-mist">{t("imp.nessunLogo")}</span>
               )}
             </div>
-            <label className="mt-3 block cursor-pointer rounded-lg border border-line px-3 py-2 text-center text-[12px] font-medium hover:bg-paper">
+            <label className="mt-3 block cursor-pointer rounded-lg border-[1.5px] border-signal px-3 py-2 text-center text-[12px] font-medium hover:bg-paper">
               {t("imp.carica")}
               <input
                 type="file"

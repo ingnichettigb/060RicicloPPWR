@@ -203,7 +203,7 @@ function Editor() {
               <button
                 type="button"
                 onClick={premiSalva}
-                className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-signal/30 bg-signal/10 px-3 py-1.5 text-[13px] font-semibold text-signal hover:bg-signal/15"
+                className="ml-2 inline-flex items-center gap-1.5 rounded-lg border-[1.5px] border-signal bg-signal/10 px-3 py-1.5 text-[13px] font-semibold text-signal hover:bg-signal/15"
               >
                 <Check className="size-3.5" />
                 {t("ed.salva")}
@@ -211,14 +211,14 @@ function Editor() {
               <button
                 type="button"
                 onClick={esportaFile}
-                className="ml-2 rounded-lg border border-line bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper"
+                className="ml-2 rounded-lg border-[1.5px] border-signal bg-white px-3 py-1.5 text-[13px] font-medium hover:bg-paper"
               >
                 {t("json.esporta")}
               </button>
               <Link
                 to="/report/$id"
                 params={{ id: v.id }}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground ring-1 ring-signal/40"
+                className="inline-flex items-center gap-1.5 rounded-lg border-[1.5px] border-signal bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground"
               >
                 <span className="inline-block size-3 shrink-0 rounded-[2px] border border-white/70" />
                 {t("ed.esporta")}
@@ -293,7 +293,7 @@ function Editor() {
                 <button
                   type="button"
                   onClick={() => setChiediNome(false)}
-                  className="rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium hover:bg-paper"
+                  className="rounded-lg border-[1.5px] border-signal px-3 py-1.5 text-[13px] font-medium hover:bg-paper"
                 >
                   {t("ed.annulla")}
                 </button>
@@ -394,7 +394,7 @@ function Editor() {
               <button
                 type="button"
                 onClick={aggiungi}
-                className="rounded-lg border border-line px-3 py-1.5 text-[12px] font-medium hover:bg-paper"
+                className="rounded-lg border-[1.5px] border-signal px-3 py-1.5 text-[12px] font-medium hover:bg-paper"
               >
                 {t("ed.aggiungi")}
               </button>

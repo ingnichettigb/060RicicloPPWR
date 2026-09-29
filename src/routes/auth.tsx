@@ -134,7 +134,7 @@ function Auth() {
           <button
             type="button"
             onClick={google}
-            className="mt-3 w-full rounded-lg border border-line px-4 py-2 text-[13px] font-medium hover:bg-paper"
+            className="mt-3 w-full rounded-lg border-[1.5px] border-signal px-4 py-2 text-[13px] font-medium hover:bg-paper"
           >
             {t("auth.google")}
           </button>

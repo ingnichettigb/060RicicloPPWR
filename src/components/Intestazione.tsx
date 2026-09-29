@@ -6,8 +6,8 @@ import { useT } from "@/lib/i18n";
 
 export function Intestazione({ azione }: { azione?: React.ReactNode }) {
   const t = useT();
-  const voce = "px-3 py-1.5 text-mist hover:text-ink transition-colors rounded-md";
-  const attiva = { className: "px-3 py-1.5 rounded-md bg-ink/5 font-medium text-ink" };
+  const voce = "rounded-lg border-[1.5px] border-signal bg-white px-3 py-1.5 text-[13px] font-medium text-ink transition-colors hover:bg-paper";
+  const attiva = { className: "rounded-lg border-[1.5px] border-signal bg-signal/10 px-3 py-1.5 text-[13px] font-semibold text-ink" };
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -31,7 +31,7 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
           <div className="font-mono text-[11px] text-mist">{t("app.sottotitolo")}</div>
         </div>
       </Link>
-      <nav className="flex flex-wrap items-center gap-1 text-[13px]">
+      <nav className="flex flex-wrap items-center gap-2 text-[13px]">
         <Link to="/valutazioni" className={voce} activeProps={attiva}>
           {t("nav.valutazioni")}
         </Link>
