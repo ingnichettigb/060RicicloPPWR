@@ -142,7 +142,52 @@ function Editor() {
     );
   }
 
-  const input = "w-full bg-transparent outline-none focus:bg-signal/5 rounded px-1 py-0.5 -mx-1";
+  const input =
+    "w-full rounded-md border border-line bg-paper px-2 py-1 outline-none transition-colors hover:border-mist/60 focus:border-signal focus:bg-white";
+  const campo =
+    "rounded-md border border-line bg-paper px-2 py-1 outline-none transition-colors hover:border-mist/60 focus:border-signal focus:bg-white";
+  const etichetta = "block font-mono text-[10px] uppercase tracking-[0.12em] text-mist";
+
+  const nomiGenerici = LINGUE.map((l) => TRADUZIONI[l]["val.nuova"].trim().toLowerCase());
+  const titoloGenerico = (s: string) =>
+    !s.trim() || nomiGenerici.includes(s.trim().toLowerCase());
+
+  async function salvaOra(dati: Valutazione) {
+    setStato("salvataggio");
+    try {
+      await aggiornaValutazione(dati);
+      qc.setQueryData(["valutazione", dati.id], dati);
+      qc.invalidateQueries({ queryKey: ["valutazioni"] });
+      setStato("salvato");
+      toast.success(t("ed.salvataggioOk"));
+    } catch {
+      setStato("errore");
+      toast.error(t("ed.errSalvataggio"));
+    }
+  }
+
+  function premiSalva() {
+    if (!v) return;
+    if (titoloGenerico(v.titolo)) {
+      setBozzaNome("");
+      setChiediNome(true);
+      return;
+    }
+    void salvaOra(v);
+  }
+
+  function confermaNome() {
+    if (!v) return;
+    const nome = bozzaNome.trim();
+    if (!nome || titoloGenerico(nome)) {
+      toast.error(t("ed.nomeObbligatorio"));
+      return;
+    }
+    const agg = { ...v, titolo: nome };
+    setV(agg);
+    setChiediNome(false);
+    void salvaOra(agg);
+  }
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -150,6 +195,14 @@ function Editor() {
         <Intestazione
           azione={
             <>
+              <button
+                type="button"
+                onClick={premiSalva}
+                className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-signal/30 bg-signal/10 px-3 py-1.5 text-[13px] font-semibold text-signal hover:bg-signal/15"
+              >
+                <Check className="size-3.5" />
+                {t("ed.salva")}
+              </button>
               <button
                 type="button"
                 onClick={esportaFile}
@@ -169,19 +222,44 @@ function Editor() {
           }
         />
 
-        <div className="mt-6 flex flex-wrap items-baseline gap-3">
-          <input
-            value={v.titolo}
-            onChange={(e) => setV({ ...v, titolo: e.target.value })}
-            className="min-w-[320px] rounded px-1 py-0.5 font-display text-[19px] font-semibold leading-tight outline-none focus:bg-signal/5"
-          />
-          <input
-            value={v.revisione}
-            onChange={(e) => setV({ ...v, revisione: e.target.value })}
-            className="w-24 rounded px-1 font-mono text-[11px] text-mist outline-none focus:bg-signal/5"
-          />
+        <div className="mt-6 flex flex-wrap items-end gap-3">
+          <div className="min-w-[320px] flex-1">
+            <label className={etichetta} htmlFor="titolo-valutazione">
+              {t("ed.etNome")}
+            </label>
+            <input
+              id="titolo-valutazione"
+              value={v.titolo}
+              placeholder={t("ed.phNome")}
+              onChange={(e) => setV({ ...v, titolo: e.target.value })}
+              className={`mt-1 w-full ${campo} font-display text-[19px] font-semibold leading-tight`}
+            />
+          </div>
+          <div>
+            <label className={etichetta} htmlFor="revisione-valutazione">
+              {t("ed.etRevisione")}
+            </label>
+            <input
+              id="revisione-valutazione"
+              value={v.revisione}
+              onChange={(e) => setV({ ...v, revisione: e.target.value })}
+              className={`mt-1 w-28 ${campo} font-mono text-[12px]`}
+            />
+          </div>
+          <div>
+            <label className={etichetta} htmlFor="data-valutazione">
+              {t("ed.etData")}
+            </label>
+            <input
+              id="data-valutazione"
+              type="date"
+              value={v.data}
+              onChange={(e) => setV({ ...v, data: e.target.value })}
+              className={`mt-1 ${campo} font-mono text-[12px]`}
+            />
+          </div>
           <span
-            className={`font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
+            className={`pb-1.5 font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
           >
             {stato === "salvato"
               ? t("ed.salvato")
@@ -189,13 +267,43 @@ function Editor() {
                 ? t("ed.errSalvataggio")
                 : t("ed.salvataggio")}
           </span>
-          <input
-            type="date"
-            value={v.data}
-            onChange={(e) => setV({ ...v, data: e.target.value })}
-            className="rounded px-1 font-mono text-[11px] text-mist outline-none focus:bg-signal/5"
-          />
         </div>
+
+        {chiediNome && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4">
+            <div className="w-full max-w-md rounded-xl bg-white p-5 ring-1 ring-black/10">
+              <div className="font-display text-[16px] font-semibold">
+                {t("ed.chiediNomeTitolo")}
+              </div>
+              <p className="mt-1 text-[12px] text-mist">{t("ed.chiediNomeTesto")}</p>
+              <input
+                autoFocus
+                value={bozzaNome}
+                placeholder={t("ed.phNome")}
+                onChange={(e) => setBozzaNome(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && confermaNome()}
+                className="mt-3 w-full rounded-md border border-line bg-paper px-3 py-2 text-[14px] outline-none focus:border-signal focus:bg-white"
+              />
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setChiediNome(false)}
+                  className="rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium hover:bg-paper"
+                >
+                  {t("ed.annulla")}
+                </button>
+                <button
+                  type="button"
+                  onClick={confermaNome}
+                  className="rounded-lg bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground"
+                >
+                  {t("ed.confermaSalva")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_352px]">
           <div className="rise overflow-hidden rounded-xl bg-white ring-1 ring-black/5">
