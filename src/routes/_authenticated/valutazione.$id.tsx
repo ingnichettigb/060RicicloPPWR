@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import { Intestazione } from "@/components/Intestazione";
 import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
+import { LINGUE, TRADUZIONI } from "@/lib/traduzioni";
 import { esportaJson } from "@/lib/esportazione";
 import { aggiornaValutazione, useAzienda, useValutazione } from "@/lib/archivio";
 import {
@@ -49,7 +51,10 @@ function Editor() {
   const [stato, setStato] = useState<"salvato" | "modificato" | "salvataggio" | "errore">(
     "salvato",
   );
+  const [chiediNome, setChiediNome] = useState(false);
+  const [bozzaNome, setBozzaNome] = useState("");
   const primo = useRef(true);
+
 
   useEffect(() => {
     if (data && !v) setV(data);
