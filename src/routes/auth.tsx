@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { SelettoreLingua } from "@/components/SelettoreLingua";
 import { useT, useTitoloPagina } from "@/lib/i18n";
+import { AUTO_LOGIN, entraConAccountProva } from "@/lib/devAuth";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -138,6 +139,27 @@ function Auth() {
           >
             {t("auth.google")}
           </button>
+          {AUTO_LOGIN && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setMsg(null);
+                try {
+                  await entraConAccountProva();
+                  navigate({ to: "/valutazioni", replace: true });
+                } catch (err) {
+                  setMsg(err instanceof Error ? err.message : t("auth.errGenerico"));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              className="mt-3 w-full rounded-lg border-[1.5px] border-signal bg-signal/10 px-4 py-2 text-[13px] font-medium text-signal hover:bg-signal/15 disabled:opacity-60"
+            >
+              {t("auth.entraProva")}
+            </button>
+          )}
           {msg && <p className="mt-3 text-[12px] text-danger">{msg}</p>}
           <button
             type="button"
