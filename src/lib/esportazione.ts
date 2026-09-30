@@ -218,7 +218,8 @@ export async function leggiPacchetto(file: File): Promise<{
       nome: testo(c["nome"], 200),
       materiale: testo(c["materiale"], 200),
       peso: Math.round(peso * 100) / 100,
-      indice: Math.round(indice * 100) / 100,
+      // sicurezza aggiuntiva: la percentuale resta sempre fra 0 e 100
+      indice: Math.min(100, Math.max(0, Math.round(indice * 100) / 100)),
     };
   });
 
