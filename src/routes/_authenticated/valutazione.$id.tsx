@@ -283,14 +283,27 @@ function Editor() {
               className={`mt-1 ${campo} font-mono text-[12px]`}
             />
           </div>
-          <span
-            className={`pb-1.5 font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
-          >
-            {stato === "salvato"
-              ? t("ed.salvato")
-              : stato === "errore"
-                ? t("ed.errSalvataggio")
-                : t("ed.salvataggio")}
+          <span className="flex items-center gap-2 pb-1.5">
+            <span
+              className={`font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
+            >
+              {stato === "salvato"
+                ? t("ed.salvato")
+                : stato === "errore"
+                  ? t("ed.errSalvataggio")
+                  : stato === "nuovoTentativo"
+                    ? t("ed.nuovoTentativo")
+                    : t("ed.salvataggio")}
+            </span>
+            {stato === "errore" && (
+              <button
+                type="button"
+                onClick={() => setTentativo((n) => n + 1)}
+                className="rounded-lg border-[1.5px] border-signal bg-white px-2 py-0.5 text-[11px] font-medium text-signal hover:bg-paper"
+              >
+                {t("ed.riprova")}
+              </button>
+            )}
           </span>
         </div>
 

@@ -15,6 +15,13 @@
       "when": 1790761111729,
       "tag": "0001_add_unita_peso_valutazioni",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790761816185,
+      "tag": "0002_titolo_valutazione_senza_default_italiano",
+      "breakpoints": true
     }
   ]
 }
