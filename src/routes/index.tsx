@@ -2,11 +2,11 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { SOGLIE } from "@/lib/ppwr";
 import { SelettoreLingua } from "@/components/SelettoreLingua";
 import { useT, useTitoloPagina } from "@/lib/i18n";
-import { AUTO_LOGIN } from "@/lib/devAuth";
+import { AUTO_LOGIN, accessoSospeso } from "@/lib/devAuth";
 
 export const Route = createFileRoute("/")({
   beforeLoad: () => {
-    if (AUTO_LOGIN) throw redirect({ to: "/valutazioni" });
+    if (AUTO_LOGIN && !accessoSospeso()) throw redirect({ to: "/valutazioni" });
   },
   head: () => ({
     meta: [

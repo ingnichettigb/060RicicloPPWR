@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SelettoreLingua } from "@/components/SelettoreLingua";
 import { useT } from "@/lib/i18n";
+import { sospendiAccessoAutomatico } from "@/lib/devAuth";
 
 export function Intestazione({ azione }: { azione?: React.ReactNode }) {
   const t = useT();
@@ -12,6 +13,8 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
   const qc = useQueryClient();
 
   async function esci() {
+    // Impedisce all'accesso automatico di prova di rientrare subito dopo la disconnessione.
+    sospendiAccessoAutomatico();
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
