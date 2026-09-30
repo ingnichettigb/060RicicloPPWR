@@ -32,11 +32,44 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
   const form = pdf.getForm();
   const ammessi = new Set(f.getCharacterSet());
 
-  // Il font standard PDF copre solo il set WinAnsi: sostituisce ciò che non può disegnare.
-  const safe = (s: string) =>
-    Array.from(s.replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/[‐‑–]/g, "-"))
-      .map((c) => (c === "\n" || ammessi.has(c.codePointAt(0) ?? 0) ? c : "?"))
+  // Il font standard PDF copre solo il set WinAnsi: prima si traducono i simboli
+  // tipografici più comuni, poi si tolgono gli accenti non rappresentabili.
+  const sostituzioni: [RegExp, string][] = [
+    [/≥/g, ">="],
+    [/≤/g, "<="],
+    [/≠/g, "!="],
+    [/[‐‑‒–—―]/g, "-"],
+    [/[’‘‚‛ʼ]/g, "'"],
+    [/[“”„‟]/g, '"'],
+    [/[•·▪]/g, "-"],
+    [/…/g, "..."],
+    [/[\u00a0\u2007\u202f\u2009\u200a]/g, " "],
+    [/[\u200b\u200c\u200d\ufeff]/g, ""],
+    [/₂/g, "2"],
+    [/₃/g, "3"],
+    [/¹/g, "1"],
+    [/×/g, "x"],
+    [/→/g, "->"],
+    [/™/g, "(TM)"],
+    [/€/g, "EUR"],
+  ];
+
+  const disegnabile = (c: string) => ammessi.has(c.codePointAt(0) ?? 0);
+
+  const safe = (s: string) => {
+    let testo = s;
+    for (const [re, sub] of sostituzioni) testo = testo.replace(re, sub);
+    return Array.from(testo)
+      .map((c) => {
+        if (c === "\n" || disegnabile(c)) return c;
+        // Scompone il carattere e tiene solo le parti rappresentabili (es. "ā" -> "a").
+        const base = Array.from(c.normalize("NFD"))
+          .filter((p) => !/\p{M}/u.test(p) && disegnabile(p))
+          .join("");
+        return base || "?";
+      })
       .join("");
+  };
 
   const righe = (s: string, font: PDFFont, size: number, max: number): string[] => {
     const out: string[] = [];
