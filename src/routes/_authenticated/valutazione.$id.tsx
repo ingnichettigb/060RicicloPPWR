@@ -49,13 +49,13 @@ function Editor() {
   const { azienda } = useAzienda();
   const qc = useQueryClient();
   const [v, setV] = useState<Valutazione | null>(null);
-  const [stato, setStato] = useState<"salvato" | "modificato" | "salvataggio" | "errore">(
-    "salvato",
-  );
+  const [stato, setStato] = useState<
+    "salvato" | "modificato" | "salvataggio" | "nuovoTentativo" | "errore"
+  >("salvato");
   const [chiediNome, setChiediNome] = useState(false);
   const [bozzaNome, setBozzaNome] = useState("");
+  const [tentativo, setTentativo] = useState(0);
   const primo = useRef(true);
-
 
   useEffect(() => {
     if (data && !v) setV(data);
@@ -68,19 +68,37 @@ function Editor() {
       return;
     }
     setStato("modificato");
+    let annullato = false;
+    // In caso di rete assente il salvataggio riprova da solo (subito, dopo 2 s e dopo 5 s).
+    const ritardi = [0, 2000, 5000];
     const t = setTimeout(async () => {
-      setStato("salvataggio");
-      try {
-        await aggiornaValutazione(v);
-        qc.setQueryData(["valutazione", v.id], v);
-        qc.invalidateQueries({ queryKey: ["valutazioni"] });
-        setStato("salvato");
-      } catch {
-        setStato("errore");
+      for (let i = 0; i < ritardi.length; i++) {
+        if (annullato) return;
+        if (ritardi[i]) {
+          setStato("nuovoTentativo");
+          await new Promise((r) => setTimeout(r, ritardi[i]));
+          if (annullato) return;
+        } else {
+          setStato("salvataggio");
+        }
+        try {
+          await aggiornaValutazione(v);
+          if (annullato) return;
+          qc.setQueryData(["valutazione", v.id], v);
+          qc.invalidateQueries({ queryKey: ["valutazioni"] });
+          setStato("salvato");
+          return;
+        } catch {
+          /* riprova al giro successivo */
+        }
       }
+      if (!annullato) setStato("errore");
     }, 700);
-    return () => clearTimeout(t);
-  }, [v, qc]);
+    return () => {
+      annullato = true;
+      clearTimeout(t);
+    };
+  }, [v, qc, tentativo]);
 
   if (!v) {
     return (
