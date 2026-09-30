@@ -176,8 +176,14 @@ export async function leggiPacchetto(file: File): Promise<{
 
   if (!grezzo || typeof grezzo !== "object") throw new Error(traduci("json.errFormato"));
   const p = grezzo as Record<string, unknown>;
-  if (typeof p["versione"] !== "string" || !p["versione"].startsWith("PPWR-")) {
+  const versione = p["versione"];
+  if (typeof versione !== "string" || !versione.startsWith("PPWR-")) {
     throw new Error(traduci("json.errFormato"));
+  }
+  // Solo i formati con la stessa versione principale sono compatibili.
+  const principale = (s: string) => s.slice(5).split(".")[0];
+  if (principale(versione) !== principale(VERSIONE_PPWR)) {
+    throw new Error(traduci("json.errVersione", { v: VERSIONE_PPWR }));
   }
   const val = p["valutazione"];
   if (!val || typeof val !== "object") throw new Error(traduci("json.errFormato"));
@@ -212,7 +218,8 @@ export async function leggiPacchetto(file: File): Promise<{
       nome: testo(c["nome"], 200),
       materiale: testo(c["materiale"], 200),
       peso: Math.round(peso * 100) / 100,
-      indice: Math.round(indice * 100) / 100,
+      // sicurezza aggiuntiva: la percentuale resta sempre fra 0 e 100
+      indice: Math.min(100, Math.max(0, Math.round(indice * 100) / 100)),
     };
   });
 

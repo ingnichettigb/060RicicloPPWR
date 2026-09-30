@@ -5,6 +5,7 @@ import { Intestazione } from "@/components/Intestazione";
 import { useT, useTitoloPagina, type T } from "@/lib/i18n";
 import { salvaAzienda, useAzienda } from "@/lib/archivio";
 import { AZIENDA_VUOTA, type Azienda } from "@/lib/ppwr";
+import { ridimensionaLogo } from "@/lib/immagine";
 
 export const Route = createFileRoute("/_authenticated/impostazioni")({
   head: () => ({
@@ -49,15 +50,23 @@ function Impostazioni() {
 
   useEffect(() => setForm(salvata), [salvata]);
 
-  function caricaLogo(file: File | undefined) {
+  async function caricaLogo(file: File | undefined) {
     if (!file) return;
-    if (file.size > 1_500_000) {
+    if (file.size > 8_000_000) {
       alert(t("imp.logoTroppoGrande"));
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, logoDataUrl: String(reader.result) }));
-    reader.readAsDataURL(file);
+    try {
+      // Il logo viene alleggerito prima del salvataggio (lato massimo 800 px).
+      const dataUrl = await ridimensionaLogo(file);
+      if (dataUrl.length > 2_100_000) {
+        alert(t("imp.logoTroppoGrande"));
+        return;
+      }
+      setForm((f) => ({ ...f, logoDataUrl: dataUrl }));
+    } catch {
+      alert(t("imp.logoTroppoGrande"));
+    }
   }
 
   async function salva() {
@@ -132,7 +141,7 @@ function Impostazioni() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => caricaLogo(e.target.files?.[0])}
+                onChange={(e) => void caricaLogo(e.target.files?.[0])}
               />
             </label>
             {form.logoDataUrl && (

@@ -49,13 +49,13 @@ function Editor() {
   const { azienda } = useAzienda();
   const qc = useQueryClient();
   const [v, setV] = useState<Valutazione | null>(null);
-  const [stato, setStato] = useState<"salvato" | "modificato" | "salvataggio" | "errore">(
-    "salvato",
-  );
+  const [stato, setStato] = useState<
+    "salvato" | "modificato" | "salvataggio" | "nuovoTentativo" | "errore"
+  >("salvato");
   const [chiediNome, setChiediNome] = useState(false);
   const [bozzaNome, setBozzaNome] = useState("");
+  const [tentativo, setTentativo] = useState(0);
   const primo = useRef(true);
-
 
   useEffect(() => {
     if (data && !v) setV(data);
@@ -68,19 +68,37 @@ function Editor() {
       return;
     }
     setStato("modificato");
+    let annullato = false;
+    // In caso di rete assente il salvataggio riprova da solo (subito, dopo 2 s e dopo 5 s).
+    const ritardi = [0, 2000, 5000];
     const t = setTimeout(async () => {
-      setStato("salvataggio");
-      try {
-        await aggiornaValutazione(v);
-        qc.setQueryData(["valutazione", v.id], v);
-        qc.invalidateQueries({ queryKey: ["valutazioni"] });
-        setStato("salvato");
-      } catch {
-        setStato("errore");
+      for (let i = 0; i < ritardi.length; i++) {
+        if (annullato) return;
+        if (ritardi[i]) {
+          setStato("nuovoTentativo");
+          await new Promise((r) => setTimeout(r, ritardi[i]));
+          if (annullato) return;
+        } else {
+          setStato("salvataggio");
+        }
+        try {
+          await aggiornaValutazione(v);
+          if (annullato) return;
+          qc.setQueryData(["valutazione", v.id], v);
+          qc.invalidateQueries({ queryKey: ["valutazioni"] });
+          setStato("salvato");
+          return;
+        } catch {
+          /* riprova al giro successivo */
+        }
       }
+      if (!annullato) setStato("errore");
     }, 700);
-    return () => clearTimeout(t);
-  }, [v, qc]);
+    return () => {
+      annullato = true;
+      clearTimeout(t);
+    };
+  }, [v, qc, tentativo]);
 
   if (!v) {
     return (
@@ -265,14 +283,27 @@ function Editor() {
               className={`mt-1 ${campo} font-mono text-[12px]`}
             />
           </div>
-          <span
-            className={`pb-1.5 font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
-          >
-            {stato === "salvato"
-              ? t("ed.salvato")
-              : stato === "errore"
-                ? t("ed.errSalvataggio")
-                : t("ed.salvataggio")}
+          <span className="flex items-center gap-2 pb-1.5">
+            <span
+              className={`font-mono text-[11px] ${stato === "errore" ? "text-danger" : "text-mist"}`}
+            >
+              {stato === "salvato"
+                ? t("ed.salvato")
+                : stato === "errore"
+                  ? t("ed.errSalvataggio")
+                  : stato === "nuovoTentativo"
+                    ? t("ed.nuovoTentativo")
+                    : t("ed.salvataggio")}
+            </span>
+            {stato === "errore" && (
+              <button
+                type="button"
+                onClick={() => setTentativo((n) => n + 1)}
+                className="rounded-lg border-[1.5px] border-signal bg-white px-2 py-0.5 text-[11px] font-medium text-signal hover:bg-paper"
+              >
+                {t("ed.riprova")}
+              </button>
+            )}
           </span>
         </div>
 

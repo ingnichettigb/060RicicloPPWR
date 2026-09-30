@@ -36,24 +36,28 @@ function Report() {
   const [pagine, setPagine] = useState<string[] | "errore" | null>(null);
 
   // L'anteprima è il PDF vero (stesso codice del download), mostrato pagina per pagina come immagini.
+  // Attende una breve pausa fra una modifica e l'altra: evita di rigenerare tutto a ogni tasto premuto.
   useEffect(() => {
     if (!v) return;
     let annullato = false;
     setPagine(null);
-    (async () => {
-      try {
-        const { generaPdf } = await import("@/lib/pdfReport");
-        const { pagineComeImmagini } = await import("@/lib/anteprimaPdf");
-        const blob = await generaPdf({ t, azienda, v, e: calcola(v.componenti) });
-        const immagini = await pagineComeImmagini(blob, () => annullato);
-        if (!annullato) setPagine(immagini);
-      } catch (err) {
-        console.error("Anteprima PDF non riuscita", err);
-        if (!annullato) setPagine("errore");
-      }
-    })();
+    const attesa = setTimeout(() => {
+      (async () => {
+        try {
+          const { generaPdf } = await import("@/lib/pdfReport");
+          const { pagineComeImmagini } = await import("@/lib/anteprimaPdf");
+          const blob = await generaPdf({ t, azienda, v, e: calcola(v.componenti) });
+          const immagini = await pagineComeImmagini(blob, () => annullato);
+          if (!annullato) setPagine(immagini);
+        } catch (err) {
+          console.error("Anteprima PDF non riuscita", err);
+          if (!annullato) setPagine("errore");
+        }
+      })();
+    }, 400);
     return () => {
       annullato = true;
+      clearTimeout(attesa);
     };
   }, [v, azienda, lingua]); // eslint-disable-line react-hooks/exhaustive-deps
 
