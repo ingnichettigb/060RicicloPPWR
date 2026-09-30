@@ -5,6 +5,7 @@ import { Intestazione } from "@/components/Intestazione";
 import { useT, useTitoloPagina, type T } from "@/lib/i18n";
 import { salvaAzienda, useAzienda } from "@/lib/archivio";
 import { AZIENDA_VUOTA, type Azienda } from "@/lib/ppwr";
+import { ridimensionaLogo } from "@/lib/immagine";
 
 export const Route = createFileRoute("/_authenticated/impostazioni")({
   head: () => ({
@@ -140,7 +141,7 @@ function Impostazioni() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => caricaLogo(e.target.files?.[0])}
+                onChange={(e) => void caricaLogo(e.target.files?.[0])}
               />
             </label>
             {form.logoDataUrl && (
