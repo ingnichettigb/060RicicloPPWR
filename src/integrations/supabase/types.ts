@@ -56,6 +56,7 @@ export type Database = {
           note: string
           revisione: string
           titolo: string
+          unita_peso: string
           updated_at: string
           user_id: string
         }
@@ -67,6 +68,7 @@ export type Database = {
           note?: string
           revisione?: string
           titolo?: string
+          unita_peso?: string
           updated_at?: string
           user_id?: string
         }
@@ -78,6 +80,7 @@ export type Database = {
           note?: string
           revisione?: string
           titolo?: string
+          unita_peso?: string
           updated_at?: string
           user_id?: string
         }

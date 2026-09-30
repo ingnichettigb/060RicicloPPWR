@@ -8,6 +8,13 @@
       "when": 1790619961386,
       "tag": "0000_ppwr_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790761111729,
+      "tag": "0001_add_unita_peso_valutazioni",
+      "breakpoints": true
     }
   ]
 }

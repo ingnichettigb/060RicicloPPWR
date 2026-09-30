@@ -95,8 +95,8 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
   const m = /^data:image\/(png|jpe?g);base64,(.+)$/i.exec(azienda.logoDataUrl || "");
   if (m) {
     try {
-      const bytes = Uint8Array.from(atob(m[2]), (ch) => ch.charCodeAt(0));
-      logo = m[1].toLowerCase() === "png" ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
+      const bytes = Uint8Array.from(atob(m[2] ?? ""), (ch) => ch.charCodeAt(0));
+      logo = (m[1] ?? "").toLowerCase() === "png" ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
     } catch {
       logo = null;
     }
@@ -248,11 +248,12 @@ export async function generaPdf({ t, azienda, v, e }: DatiReport): Promise<Blob>
     const opz = { font: fb, size: 7, color: MIST };
     for (let i = 0; i < n; i++) {
       const yy = y - i * 9;
-      if (hs[0][i]) testo(p, hs[0][i], col.nome.x, yy, opz);
-      if (hs[1][i]) testo(p, hs[1][i], col.mat.x, yy, opz);
-      if (hs[2][i]) testo(p, hs[2][i], col.peso.dx, yy, { ...opz, dx: true });
-      if (hs[3][i]) testo(p, hs[3][i], col.indice.dx, yy, { ...opz, dx: true });
-      if (hs[4][i]) testo(p, hs[4][i], col.massa.dx, yy, { ...opz, dx: true });
+      const cella = (k: number) => hs[k]?.[i] ?? "";
+      if (cella(0)) testo(p, cella(0), col.nome.x, yy, opz);
+      if (cella(1)) testo(p, cella(1), col.mat.x, yy, opz);
+      if (cella(2)) testo(p, cella(2), col.peso.dx, yy, { ...opz, dx: true });
+      if (cella(3)) testo(p, cella(3), col.indice.dx, yy, { ...opz, dx: true });
+      if (cella(4)) testo(p, cella(4), col.massa.dx, yy, { ...opz, dx: true });
     }
     y -= (n - 1) * 9 + 8;
     p.drawLine({ start: { x: M, y }, end: { x: W - M, y }, thickness: 0.75, color: LINE });
