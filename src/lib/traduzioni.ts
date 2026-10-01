@@ -1,3 +1,10 @@
+// ======================================================================
+// Nome File: traduzioni.ts
+// Percorso: src/lib/traduzioni.ts
+// Revisione: Rev. 1
+// Data/Ora: 2026-10-01 20:56
+// ======================================================================
+
 export const LINGUE = ["it", "en", "de", "es"] as const;
 export type Lingua = (typeof LINGUE)[number];
 
@@ -22,6 +29,7 @@ const it = {
   "nav.valutazioni": "Valutazioni",
   "nav.impostazioni": "Impostazioni",
   "nav.esci": "Esci",
+  "nav.chiudiApp": "Chiudi applicazione",
   "lingua.etichetta": "Lingua",
   "comune.caricamento": "Caricamento…",
   "comune.nonTrovata": "Valutazione non trovata.",
@@ -224,6 +232,7 @@ const en: Record<Chiave, string> = {
   "nav.valutazioni": "Assessments",
   "nav.impostazioni": "Settings",
   "nav.esci": "Sign out",
+  "nav.chiudiApp": "Close application",
   "lingua.etichetta": "Language",
   "comune.caricamento": "Loading…",
   "comune.nonTrovata": "Assessment not found.",
@@ -415,6 +424,7 @@ const de: Record<Chiave, string> = {
   "nav.valutazioni": "Bewertungen",
   "nav.impostazioni": "Einstellungen",
   "nav.esci": "Abmelden",
+  "nav.chiudiApp": "Anwendung schließen",
   "lingua.etichetta": "Sprache",
   "comune.caricamento": "Wird geladen…",
   "comune.nonTrovata": "Bewertung nicht gefunden.",
@@ -611,6 +621,7 @@ const es: Record<Chiave, string> = {
   "nav.valutazioni": "Evaluaciones",
   "nav.impostazioni": "Ajustes",
   "nav.esci": "Cerrar sesión",
+  "nav.chiudiApp": "Cerrar aplicación",
   "lingua.etichetta": "Idioma",
   "comune.caricamento": "Cargando…",
   "comune.nonTrovata": "Evaluación no encontrada.",

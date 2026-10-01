@@ -1,3 +1,10 @@
+// ======================================================================
+// Nome File: Intestazione.tsx
+// Percorso: src/components/Intestazione.tsx
+// Revisione: Rev. 1
+// Data/Ora: 2026-10-01 20:56
+// ======================================================================
+
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +25,26 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  // =====================================================================
+  // FN001[ChiudiApplicazione]: sospende l'auto-login, svuota la cache, esegue il logout
+  // e tenta di chiudere la scheda; se il browser blocca window.close() porta a /auth.
+  // =====================================================================
+  async function FN001_ChiudiApplicazione() {
+    // Impedisce all'accesso automatico di prova di riattivarsi.
+    sospendiAccessoAutomatico();
+    await qc.cancelQueries();
+    qc.clear();
+    try {
+      await supabase.auth.signOut();
+    } catch (errore) {
+      console.error("ERR001: Logout non riuscito durante la chiusura dell'applicazione", errore);
+    }
+    // Tentativo di chiusura della scheda (i browser la consentono solo in certi casi).
+    window.close();
+    // Fallback: se la scheda resta aperta, si torna alla schermata di accesso.
     navigate({ to: "/auth", replace: true });
   }
 
@@ -43,6 +70,10 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
         </Link>
         <button type="button" onClick={esci} className={voce}>
           {t("nav.esci")}
+        </button>
+        {/* BT01_ChiudiApplicazione */}
+        <button type="button" onClick={FN001_ChiudiApplicazione} className={voce}>
+          {t("nav.chiudiApp")}
         </button>
         <SelettoreLingua />
         {azione}
