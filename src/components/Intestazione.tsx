@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: Intestazione.tsx
 // Percorso: src/components/Intestazione.tsx
-// Revisione: Rev. 1
-// Data/Ora: 2026-10-01 20:56
+// Revisione: Rev. 2
+// Data/Ora: 2026-10-01 21:03
 // ======================================================================
 
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -61,7 +61,7 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
           <div className="font-mono text-[11px] text-mist">{t("app.sottotitolo")}</div>
         </div>
       </Link>
-      <nav className="flex flex-wrap items-center gap-2 text-[13px]">
+      <nav className="flex flex-1 flex-wrap items-center justify-end gap-2 text-[13px]">
         <Link to="/valutazioni" className={voce} activeProps={attiva}>
           {t("nav.valutazioni")}
         </Link>
@@ -71,13 +71,15 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
         <button type="button" onClick={esci} className={voce}>
           {t("nav.esci")}
         </button>
-        {/* BT01_ChiudiApplicazione */}
-        <button type="button" onClick={FN001_ChiudiApplicazione} className={voce}>
-          {t("nav.chiudiApp")}
-        </button>
         <SelettoreLingua />
         {azione}
       </nav>
+      {/* BT01_ChiudiApplicazione */}
+      <div className="ml-3">
+        <button type="button" onClick={FN001_ChiudiApplicazione} className={voce}>
+          {t("nav.chiudiApp")}
+        </button>
+      </div>
     </header>
   );
 }
