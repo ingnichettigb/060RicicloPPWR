@@ -83,6 +83,14 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
         <Link to="/impostazioni" className={voce} activeProps={attiva}>
           {t("nav.impostazioni")}
         </Link>
+        <Link
+          to="/guida"
+          title={t("nav.guida")}
+          aria-label={t("nav.guida")}
+          className="grid size-8 place-items-center rounded-full border-[1.5px] border-signal bg-white font-display text-[14px] font-bold italic text-ink transition-colors hover:bg-paper"
+        >
+          i
+        </Link>
         {/* BT02_Esci */}
         <button type="button" onClick={FN062_Esci} className={voce}>
           {t("nav.esci")}

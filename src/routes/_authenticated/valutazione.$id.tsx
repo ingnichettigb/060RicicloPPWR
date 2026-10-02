@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { Intestazione } from "@/components/Intestazione";
+import { Suggerimento } from "@/components/Suggerimento";
 import { CampoNumero } from "@/components/CampoNumero";
 import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
@@ -263,6 +264,7 @@ function Editor() {
           <div>
             <label className={etichetta} htmlFor="revisione-valutazione">
               {t("ed.etRevisione")}
+              <Suggerimento chiave="hint.revisione" />
             </label>
             <input
               id="revisione-valutazione"
@@ -354,11 +356,11 @@ function Editor() {
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-[10px] uppercase tracking-[0.12em] text-mist">
-                  <th className="px-4 py-2.5 font-medium">{t("ed.colComponente")}</th>
-                  <th className="px-3 py-2.5 font-medium">{t("ed.colMateriale")}</th>
-                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPeso")}</th>
-                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPercRicic")}</th>
-                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colMassaRicic")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("ed.colComponente")}<Suggerimento chiave="hint.componente" /></th>
+                  <th className="px-3 py-2.5 font-medium">{t("ed.colMateriale")}<Suggerimento chiave="hint.materiale" /></th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPeso")}<Suggerimento chiave="hint.peso" /></th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colPercRicic")}<Suggerimento chiave="hint.indice" /></th>
+                  <th className="px-3 py-2.5 text-right font-medium">{t("ed.colMassaRicic")}<Suggerimento chiave="hint.massa" /></th>
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
@@ -523,6 +525,7 @@ function Editor() {
             <div className="rounded-xl bg-white p-5 ring-1 ring-black/5">
               <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
                 {t("ed.note")}
+                <Suggerimento chiave="hint.note" />
               </div>
               <textarea
                 value={v.note}
