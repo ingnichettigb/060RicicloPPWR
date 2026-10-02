@@ -46,6 +46,14 @@ function Landing() {
             <div className="font-display text-[15px] font-semibold">{t("app.nome")}</div>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              to="/guida"
+              title={t("nav.guida")}
+              aria-label={t("nav.guida")}
+              className="grid size-8 place-items-center rounded-full border-[1.5px] border-signal bg-white font-display text-[14px] font-bold italic text-ink hover:bg-paper"
+            >
+              i
+            </Link>
             <SelettoreLingua />
             <Link
               to="/valutazioni"

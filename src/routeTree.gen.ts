@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AttivazioneRouteImport } from './routes/attivazione'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CondizioniRouteImport } from './routes/condizioni'
+import { Route as GuidaRouteImport } from './routes/guida'
 import { Route as LicenzaScadutaRouteImport } from './routes/licenza-scaduta'
 import { Route as AuthenticatedImpostazioniRouteImport } from './routes/_authenticated/impostazioni'
 import { Route as AuthenticatedValutazioniRouteImport } from './routes/_authenticated/valutazioni'
@@ -42,6 +43,11 @@ const AuthRoute = AuthRouteImport.update({
 const CondizioniRoute = CondizioniRouteImport.update({
   id: '/condizioni',
   path: '/condizioni',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidaRoute = GuidaRouteImport.update({
+  id: '/guida',
+  path: '/guida',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LicenzaScadutaRoute = LicenzaScadutaRouteImport.update({
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/attivazione': typeof AttivazioneRoute
   '/auth': typeof AuthRoute
   '/condizioni': typeof CondizioniRoute
+  '/guida': typeof GuidaRoute
   '/licenza-scaduta': typeof LicenzaScadutaRoute
   '/impostazioni': typeof AuthenticatedImpostazioniRoute
   '/valutazioni': typeof AuthenticatedValutazioniRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/attivazione': typeof AttivazioneRoute
   '/auth': typeof AuthRoute
   '/condizioni': typeof CondizioniRoute
+  '/guida': typeof GuidaRoute
   '/licenza-scaduta': typeof LicenzaScadutaRoute
   '/impostazioni': typeof AuthenticatedImpostazioniRoute
   '/valutazioni': typeof AuthenticatedValutazioniRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/attivazione': typeof AttivazioneRoute
   '/auth': typeof AuthRoute
   '/condizioni': typeof CondizioniRoute
+  '/guida': typeof GuidaRoute
   '/licenza-scaduta': typeof LicenzaScadutaRoute
   '/_authenticated/impostazioni': typeof AuthenticatedImpostazioniRoute
   '/_authenticated/valutazioni': typeof AuthenticatedValutazioniRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/attivazione'
     | '/auth'
     | '/condizioni'
+    | '/guida'
     | '/licenza-scaduta'
     | '/impostazioni'
     | '/valutazioni'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/attivazione'
     | '/auth'
     | '/condizioni'
+    | '/guida'
     | '/licenza-scaduta'
     | '/impostazioni'
     | '/valutazioni'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/attivazione'
     | '/auth'
     | '/condizioni'
+    | '/guida'
     | '/licenza-scaduta'
     | '/_authenticated/impostazioni'
     | '/_authenticated/valutazioni'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   AttivazioneRoute: typeof AttivazioneRoute
   AuthRoute: typeof AuthRoute
   CondizioniRoute: typeof CondizioniRoute
+  GuidaRoute: typeof GuidaRoute
   LicenzaScadutaRoute: typeof LicenzaScadutaRoute
 }
 
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/condizioni'
       fullPath: '/condizioni'
       preLoaderRoute: typeof CondizioniRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guida': {
+      id: '/guida'
+      path: '/guida'
+      fullPath: '/guida'
+      preLoaderRoute: typeof GuidaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/licenza-scaduta': {
@@ -252,6 +272,7 @@ const rootRouteChildren: RootRouteChildren = {
   AttivazioneRoute: AttivazioneRoute,
   AuthRoute: AuthRoute,
   CondizioniRoute: CondizioniRoute,
+  GuidaRoute: GuidaRoute,
   LicenzaScadutaRoute: LicenzaScadutaRoute,
 }
 export const routeTree = rootRouteImport
