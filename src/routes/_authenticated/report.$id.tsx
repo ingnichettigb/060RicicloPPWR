@@ -1,9 +1,18 @@
+// ======================================================================
+// Nome File: report.$id.tsx
+// Percorso: src/routes/_authenticated/report.$id.tsx
+// Revisione: Rev. 1
+// Data/Ora: 2026-10-01 21:46
+// ======================================================================
+
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { Intestazione } from "@/components/Intestazione";
 import { useLingua, useTitoloPagina } from "@/lib/i18n";
 import { useAzienda, useValutazione } from "@/lib/archivio";
 import { calcola } from "@/lib/ppwr";
+import { useExportQuota } from "@/moduli/accesso-controllato/esportazione/useExportQuota";
+import { FN060_ExportCountBadge } from "@/moduli/accesso-controllato/esportazione/ExportCountBadge";
 
 export const Route = createFileRoute("/_authenticated/report/$id")({
   head: () => ({
@@ -34,6 +43,7 @@ function Report() {
   const { azienda } = useAzienda();
   const { data: v, isLoading } = useValutazione(id);
   const [pagine, setPagine] = useState<string[] | "errore" | null>(null);
+  const quota = useExportQuota();
 
   // L'anteprima è il PDF vero (stesso codice del download), mostrato pagina per pagina come immagini.
   // Attende una breve pausa fra una modifica e l'altra: evita di rigenerare tutto a ogni tasto premuto.
@@ -77,11 +87,14 @@ function Report() {
   return (
     <div className="min-h-screen bg-paper text-ink">
       <div className="mx-auto max-w-[1180px] px-6 py-7">
+        {quota.dialog}
         <Intestazione
           azione={
+            // BT11_ScaricaPdfReport
             <button
               type="button"
               onClick={async () => {
+                if (!(await quota.consume())) return;
                 try {
                   const { scaricaPdf } = await import("@/lib/pdfReport");
                   await scaricaPdf({ t, azienda, v, e: calcola(v.componenti) });
@@ -90,8 +103,9 @@ function Report() {
                   window.alert(t("rep.errScarica"));
                 }
               }}
-              className="ml-2 rounded-lg border-[1.5px] border-signal bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground"
+              className="relative ml-2 rounded-lg border-[1.5px] border-signal bg-signal px-3 py-1.5 text-[13px] font-medium text-primary-foreground"
             >
+              <FN060_ExportCountBadge count={quota.remaining} />
               {t("rep.stampa")}
             </button>
           }

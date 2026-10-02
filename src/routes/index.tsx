@@ -1,13 +1,17 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+// ======================================================================
+// Nome File: index.tsx
+// Percorso: src/routes/index.tsx
+// Revisione: Rev. 2
+// Data/Ora: 2026-10-01 21:46
+// ======================================================================
+
+// Schermata 0000 - Home page (landing pubblica). Rimosso l'accesso automatico di prova.
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SOGLIE } from "@/lib/ppwr";
 import { SelettoreLingua } from "@/components/SelettoreLingua";
 import { useT, useTitoloPagina } from "@/lib/i18n";
-import { AUTO_LOGIN, accessoSospeso } from "@/lib/devAuth";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: () => {
-    if (AUTO_LOGIN && !accessoSospeso()) throw redirect({ to: "/valutazioni" });
-  },
   head: () => ({
     meta: [
       { title: "Riciclabilità PPWR — Calcolo grado di riciclabilità imballaggi" },

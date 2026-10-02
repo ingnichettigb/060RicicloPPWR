@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: Intestazione.tsx
 // Percorso: src/components/Intestazione.tsx
-// Revisione: Rev. 3
-// Data/Ora: 2026-10-01 21:09
+// Revisione: Rev. 4
+// Data/Ora: 2026-10-01 21:46
 // ======================================================================
 
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SelettoreLingua } from "@/components/SelettoreLingua";
 import { useT } from "@/lib/i18n";
-import { sospendiAccessoAutomatico } from "@/lib/devAuth";
+import { FN016_EsciECancellaTutto } from "@/moduli/accesso-controllato/stato";
 
 export function Intestazione({ azione }: { azione?: React.ReactNode }) {
   const t = useT();
@@ -19,28 +19,37 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  async function esci() {
-    // Impedisce all'accesso automatico di prova di rientrare subito dopo la disconnessione.
-    sospendiAccessoAutomatico();
+  // ======================================================================
+  // FN062[Esci]: svuota la cache e chiude la sessione mantenendo i dati di licenza sul dispositivo, poi va a /auth.
+  // ======================================================================
+  async function FN062_Esci() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
 
+  // ======================================================================
+  // FN063[GestisciEsciECancella]: come Esci, ma cancella anche email, licenza, PUK e consenso salvati sul dispositivo.
+  // ======================================================================
+  async function FN063_GestisciEsciECancella() {
+    await qc.cancelQueries();
+    qc.clear();
+    await FN016_EsciECancellaTutto();
+    navigate({ to: "/auth", replace: true });
+  }
+
   // =====================================================================
-  // FN001[ChiudiApplicazione]: sospende l'auto-login, svuota la cache, esegue il logout
+  // FN001[ChiudiApplicazione]: svuota la cache, esegue il logout
   // e tenta di chiudere la scheda; se il browser blocca window.close() porta a /auth.
   // =====================================================================
   async function FN001_ChiudiApplicazione() {
-    // Impedisce all'accesso automatico di prova di riattivarsi.
-    sospendiAccessoAutomatico();
     await qc.cancelQueries();
     qc.clear();
     try {
       await supabase.auth.signOut();
     } catch (errore) {
-      console.error("ERR001: Logout non riuscito durante la chiusura dell'applicazione", errore);
+      console.error("ERR900: Logout non riuscito durante la chiusura dell'applicazione", errore);
     }
     // Tentativo di chiusura della scheda (i browser la consentono solo in certi casi).
     window.close();
@@ -74,8 +83,17 @@ export function Intestazione({ azione }: { azione?: React.ReactNode }) {
         <Link to="/impostazioni" className={voce} activeProps={attiva}>
           {t("nav.impostazioni")}
         </Link>
-        <button type="button" onClick={esci} className={voce}>
+        {/* BT02_Esci */}
+        <button type="button" onClick={FN062_Esci} className={voce}>
           {t("nav.esci")}
+        </button>
+        {/* BT03_EsciECancellaTutto */}
+        <button
+          type="button"
+          onClick={FN063_GestisciEsciECancella}
+          className="rounded-lg border-[1.5px] border-danger bg-white px-3 py-1.5 text-[13px] font-medium text-danger transition-colors hover:bg-danger/10"
+        >
+          {t("nav.esciCancella")}
         </button>
         <SelettoreLingua />
         {azione}
