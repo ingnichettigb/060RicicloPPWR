@@ -7,10 +7,11 @@
 
 // Configurazione centrale del modulo. Unico file da personalizzare per ogni nuova SaaS.
 
-export const APP_CODE = "**INSERISCI_QUI_APP_CODE**";
+export const APP_CODE = "060RicicloPPWR";
 export const APP_NAME = "Riciclabilità PPWR";
 export const TERMS_VERSION = "v1";
-export const EMAIL_MITTENTE = "**INSERISCI_QUI_MITTENTE_EMAIL**";
+// Mittente: letto dal secret RESEND_FROM_EMAIL sul server (vedi otp.server.ts).
+export const EMAIL_MITTENTE = "";
 
 export const OTP_SCADENZA_MINUTI = 10;
 export const OTP_MAX_RICHIESTE = 3;

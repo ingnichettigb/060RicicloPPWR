@@ -84,7 +84,7 @@ async function FN024_InviaEmailOtp(
         "X-Connection-Api-Key": chiaveResend,
       },
       body: JSON.stringify({
-        from: EMAIL_MITTENTE,
+        from: process.env["RESEND_FROM_EMAIL"] || EMAIL_MITTENTE,
         to: [email],
         subject: `${APP_NAME} — ${testi.oggetto}`,
         html,
