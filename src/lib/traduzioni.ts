@@ -209,6 +209,22 @@ const it = {
   "ed.annulla": "Annulla",
   "ed.confermaSalva": "Conferma e salva",
   "ed.nomeObbligatorio": "Inserisci un nome diverso da «Nuova valutazione».",
+
+  "nav.guida": "Guida",
+  "guida.titoloPagina": "Guida — Riciclabilità PPWR",
+  "guida.titolo": "Guida all'uso",
+  "guida.intro": "Come funziona il programma, dal calcolo al report PDF.",
+  "guida.sommario": "Indice",
+  "guida.torna": "← torna all'app",
+  "guida.avviso": "Strumento di supporto al calcolo: verifica sempre classi e soglie sul testo ufficiale del Reg. (UE) 2025/40.",
+  "hint.apri": "Mostra suggerimento",
+  "hint.revisione": "Codice di revisione del documento, ad es. REV 01, REV 02. Compare nel report.",
+  "hint.componente": "Parte dell'imballaggio: ad es. serbatoio, valvola, guarnizione, tappo.",
+  "hint.materiale": "Designazione del materiale: ad es. PET, HDPE, AISI 304, EPDM.",
+  "hint.peso": "Massa del componente in grammi. Punto o virgola, al massimo due decimali.",
+  "hint.indice": "Quota riciclabile da 0 a 100. 100 per materiali omogenei con filiera di riciclo in UE; 0 per elastomeri, termoindurenti o plastiche miste senza filiera; un valore intermedio solo se certificato.",
+  "hint.massa": "Calcolata in automatico: peso × % riciclabile ÷ 100.",
+  "hint.note": "Ipotesi di calcolo, codici disegno, scomposizione degli assiemi, norme adottate. Compaiono nella sezione 4 del report.",
 };
 
 export type Chiave = keyof typeof it;
@@ -390,6 +406,22 @@ const en: Record<Chiave, string> = {
   "ed.annulla": "Cancel",
   "ed.confermaSalva": "Confirm and save",
   "ed.nomeObbligatorio": "Please enter a name other than “New assessment”.",
+
+  "nav.guida": "Help",
+  "guida.titoloPagina": "Guide — PPWR Recyclability",
+  "guida.titolo": "User guide",
+  "guida.intro": "How the program works, from the calculation to the PDF report.",
+  "guida.sommario": "Contents",
+  "guida.torna": "← back to the app",
+  "guida.avviso": "Calculation support tool: always check grades and thresholds against the official text of Reg. (EU) 2025/40.",
+  "hint.apri": "Show hint",
+  "hint.revisione": "Document revision code, e.g. REV 01, REV 02. It appears in the report.",
+  "hint.componente": "Part of the packaging: e.g. tank, valve, gasket, cap.",
+  "hint.materiale": "Material designation: e.g. PET, HDPE, AISI 304, EPDM.",
+  "hint.peso": "Mass of the component in grams. Point or comma, at most two decimals.",
+  "hint.indice": "Recyclable share from 0 to 100. 100 for homogeneous materials with an EU recycling stream; 0 for elastomers, thermosets or mixed plastics with no stream; an intermediate value only if certified.",
+  "hint.massa": "Calculated automatically: weight × recyclable % ÷ 100.",
+  "hint.note": "Calculation assumptions, drawing codes, breakdown of assemblies, standards adopted. They appear in section 4 of the report.",
 };
 
 const de: Record<Chiave, string> = {
@@ -573,6 +605,22 @@ const de: Record<Chiave, string> = {
   "ed.annulla": "Abbrechen",
   "ed.confermaSalva": "Bestätigen und speichern",
   "ed.nomeObbligatorio": "Bitte geben Sie einen anderen Namen als „Neue Bewertung“ ein.",
+
+  "nav.guida": "Hilfe",
+  "guida.titoloPagina": "Anleitung — PPWR-Recyclingfähigkeit",
+  "guida.titolo": "Bedienungsanleitung",
+  "guida.intro": "So funktioniert das Programm, von der Berechnung bis zum PDF-Bericht.",
+  "guida.sommario": "Inhalt",
+  "guida.torna": "← zurück zur App",
+  "guida.avviso": "Hilfsmittel zur Berechnung: Klassen und Schwellenwerte immer am offiziellen Text der Verordnung (EU) 2025/40 prüfen.",
+  "hint.apri": "Hinweis anzeigen",
+  "hint.revisione": "Revisionscode des Dokuments, z. B. REV 01, REV 02. Erscheint im Bericht.",
+  "hint.componente": "Teil der Verpackung: z. B. Tank, Ventil, Dichtung, Verschluss.",
+  "hint.materiale": "Werkstoffbezeichnung: z. B. PET, HDPE, AISI 304, EPDM.",
+  "hint.peso": "Masse des Bauteils in Gramm. Punkt oder Komma, höchstens zwei Nachkommastellen.",
+  "hint.indice": "Recycelbarer Anteil von 0 bis 100. 100 für homogene Werkstoffe mit EU-Recyclingkette; 0 für Elastomere, Duroplaste oder Mischkunststoffe ohne Kette; ein Zwischenwert nur bei Zertifizierung.",
+  "hint.massa": "Wird automatisch berechnet: Gewicht × recycelbarer Anteil in % ÷ 100.",
+  "hint.note": "Berechnungsannahmen, Zeichnungsnummern, Zerlegung von Baugruppen, angewandte Normen. Sie erscheinen in Abschnitt 4 des Berichts.",
 };
 
 const es: Record<Chiave, string> = {
@@ -753,6 +801,22 @@ const es: Record<Chiave, string> = {
   "ed.annulla": "Cancelar",
   "ed.confermaSalva": "Confirmar y guardar",
   "ed.nomeObbligatorio": "Introduce un nombre distinto de «Nueva evaluación».",
+
+  "nav.guida": "Ayuda",
+  "guida.titoloPagina": "Guía — Reciclabilidad PPWR",
+  "guida.titolo": "Guía de uso",
+  "guida.intro": "Cómo funciona el programa, desde el cálculo hasta el informe en PDF.",
+  "guida.sommario": "Índice",
+  "guida.torna": "← volver a la app",
+  "guida.avviso": "Herramienta de apoyo al cálculo: comprueba siempre las clases y los umbrales en el texto oficial del Reg. (UE) 2025/40.",
+  "hint.apri": "Mostrar sugerencia",
+  "hint.revisione": "Código de revisión del documento, p. ej. REV 01, REV 02. Aparece en el informe.",
+  "hint.componente": "Parte del embalaje: p. ej. depósito, válvula, junta, tapón.",
+  "hint.materiale": "Designación del material: p. ej. PET, HDPE, AISI 304, EPDM.",
+  "hint.peso": "Masa del componente en gramos. Punto o coma, como máximo dos decimales.",
+  "hint.indice": "Parte reciclable de 0 a 100. 100 para materiales homogéneos con cadena de reciclaje en la UE; 0 para elastómeros, termoestables o plásticos mezclados sin cadena; un valor intermedio solo si está certificado.",
+  "hint.massa": "Se calcula automáticamente: peso × % reciclable ÷ 100.",
+  "hint.note": "Hipótesis de cálculo, códigos de plano, desglose de conjuntos, normas adoptadas. Aparecen en la sección 4 del informe.",
 };
 
 export const TRADUZIONI: Record<Lingua, Record<Chiave, string>> = { it, en, de, es };
