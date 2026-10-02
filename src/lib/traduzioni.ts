@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: traduzioni.ts
 // Percorso: src/lib/traduzioni.ts
-// Revisione: Rev. 1
-// Data/Ora: 2026-10-01 20:56
+// Revisione: Rev. 2
+// Data/Ora: 2026-10-01 21:46
 // ======================================================================
 
 export const LINGUE = ["it", "en", "de", "es"] as const;
@@ -30,6 +30,7 @@ const it = {
   "nav.impostazioni": "Impostazioni",
   "nav.esci": "Esci",
   "nav.chiudiApp": "Chiudi applicazione",
+  "nav.esciCancella": "Esci e cancella tutto",
   "lingua.etichetta": "Lingua",
   "comune.caricamento": "Caricamento…",
   "comune.nonTrovata": "Valutazione non trovata.",
@@ -63,20 +64,6 @@ const it = {
   "landing.inizia": "Inizia una valutazione",
 
   // Auth
-  "auth.titoloPagina": "Accedi — Riciclabilità PPWR",
-  "auth.accedi": "Accedi",
-  "auth.crea": "Crea un account",
-  "auth.email": "Email",
-  "auth.password": "Password",
-  "auth.registrati": "Registrati",
-  "auth.google": "Continua con Google",
-  "auth.entraProva": "Entra con l'account di prova",
-  "auth.errValidazione": "Inserisci un'email valida e una password di almeno 6 caratteri.",
-  "auth.controllaEmail": "Controlla la tua email per confermare la registrazione.",
-  "auth.errGenerico": "Operazione non riuscita.",
-  "auth.errGoogle": "Accesso con Google non riuscito.",
-  "auth.noAccount": "Non hai un account? Registrati",
-  "auth.haAccount": "Hai già un account? Accedi",
 
   // Impostazioni
   "imp.titoloPagina": "Impostazioni azienda — Riciclabilità PPWR",
@@ -233,6 +220,7 @@ const en: Record<Chiave, string> = {
   "nav.impostazioni": "Settings",
   "nav.esci": "Sign out",
   "nav.chiudiApp": "Close application",
+  "nav.esciCancella": "Sign out and clear everything",
   "lingua.etichetta": "Language",
   "comune.caricamento": "Loading…",
   "comune.nonTrovata": "Assessment not found.",
@@ -262,20 +250,6 @@ const en: Record<Chiave, string> = {
     "Build your packaging component by component, get the mass percentage and the PPWR grade in real time, and export a technical report headed with your company details. Everything is saved online and synced across your devices.",
   "landing.inizia": "Start an assessment",
 
-  "auth.titoloPagina": "Sign in — PPWR Recyclability",
-  "auth.accedi": "Sign in",
-  "auth.crea": "Create an account",
-  "auth.email": "Email",
-  "auth.password": "Password",
-  "auth.registrati": "Sign up",
-  "auth.google": "Continue with Google",
-  "auth.entraProva": "Enter with the test account",
-  "auth.errValidazione": "Enter a valid email and a password of at least 6 characters.",
-  "auth.controllaEmail": "Check your email to confirm your registration.",
-  "auth.errGenerico": "Operation failed.",
-  "auth.errGoogle": "Google sign-in failed.",
-  "auth.noAccount": "Don't have an account? Sign up",
-  "auth.haAccount": "Already have an account? Sign in",
 
   "imp.titoloPagina": "Company settings — PPWR Recyclability",
   "imp.titolo": "Details of the company preparing the report",
@@ -425,6 +399,7 @@ const de: Record<Chiave, string> = {
   "nav.impostazioni": "Einstellungen",
   "nav.esci": "Abmelden",
   "nav.chiudiApp": "Anwendung schließen",
+  "nav.esciCancella": "Abmelden und alles löschen",
   "lingua.etichetta": "Sprache",
   "comune.caricamento": "Wird geladen…",
   "comune.nonTrovata": "Bewertung nicht gefunden.",
@@ -456,21 +431,6 @@ const de: Record<Chiave, string> = {
     "Setzen Sie die Verpackung aus ihren Komponenten zusammen, erhalten Sie den Massenanteil und die PPWR-Klasse in Echtzeit und exportieren Sie einen technischen Bericht mit Ihrem Firmenkopf. Alles wird online gespeichert und zwischen Ihren Geräten synchronisiert.",
   "landing.inizia": "Bewertung starten",
 
-  "auth.titoloPagina": "Anmelden — PPWR-Recyclingfähigkeit",
-  "auth.accedi": "Anmelden",
-  "auth.crea": "Konto erstellen",
-  "auth.email": "E-Mail",
-  "auth.password": "Passwort",
-  "auth.registrati": "Registrieren",
-  "auth.google": "Weiter mit Google",
-  "auth.entraProva": "Mit dem Testkonto anmelden",
-  "auth.errValidazione":
-    "Geben Sie eine gültige E-Mail-Adresse und ein Passwort mit mindestens 6 Zeichen ein.",
-  "auth.controllaEmail": "Prüfen Sie Ihr E-Mail-Postfach, um die Registrierung zu bestätigen.",
-  "auth.errGenerico": "Vorgang fehlgeschlagen.",
-  "auth.errGoogle": "Anmeldung mit Google fehlgeschlagen.",
-  "auth.noAccount": "Noch kein Konto? Registrieren",
-  "auth.haAccount": "Bereits ein Konto? Anmelden",
 
   "imp.titoloPagina": "Firmeneinstellungen — PPWR-Recyclingfähigkeit",
   "imp.titolo": "Daten des erstellenden Unternehmens",
@@ -622,6 +582,7 @@ const es: Record<Chiave, string> = {
   "nav.impostazioni": "Ajustes",
   "nav.esci": "Cerrar sesión",
   "nav.chiudiApp": "Cerrar aplicación",
+  "nav.esciCancella": "Salir y borrar todo",
   "lingua.etichetta": "Idioma",
   "comune.caricamento": "Cargando…",
   "comune.nonTrovata": "Evaluación no encontrada.",
@@ -651,21 +612,6 @@ const es: Record<Chiave, string> = {
     "Compón el envase por componentes, obtén el porcentaje en masa y el grado PPWR en tiempo real y exporta un informe técnico con el membrete de tu empresa. Todo se guarda en línea y se sincroniza entre tus dispositivos.",
   "landing.inizia": "Iniciar una evaluación",
 
-  "auth.titoloPagina": "Acceder — Reciclabilidad PPWR",
-  "auth.accedi": "Acceder",
-  "auth.crea": "Crear una cuenta",
-  "auth.email": "Correo electrónico",
-  "auth.password": "Contraseña",
-  "auth.registrati": "Registrarse",
-  "auth.google": "Continuar con Google",
-  "auth.entraProva": "Entrar con la cuenta de prueba",
-  "auth.errValidazione":
-    "Introduce un correo electrónico válido y una contraseña de al menos 6 caracteres.",
-  "auth.controllaEmail": "Revisa tu correo electrónico para confirmar el registro.",
-  "auth.errGenerico": "La operación no se ha podido completar.",
-  "auth.errGoogle": "No se pudo acceder con Google.",
-  "auth.noAccount": "¿No tienes una cuenta? Regístrate",
-  "auth.haAccount": "¿Ya tienes una cuenta? Accede",
 
   "imp.titoloPagina": "Ajustes de la empresa — Reciclabilidad PPWR",
   "imp.titolo": "Datos de la empresa que elabora el informe",
