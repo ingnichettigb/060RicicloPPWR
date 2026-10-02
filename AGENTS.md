@@ -11,3 +11,5 @@
 
 - Data (valutazioni, aziende incl. logo as data URL) lives in Lovable Cloud tables with per-user RLS, accessed from the browser client via src/lib/archivio.ts — sync across devices.
 - App pages live under src/routes/_authenticated/; / is a public landing, /auth handles email+Google sign-in.
+
+- Accesso: modulo autonomo in src/moduli/accesso-controllato (OTP su DB locale lead_emails, licenze/PUK/consensi/quota PDF su DB esterno via secret EXTERNAL_*); le rotte ne sono solo collegamenti — così il modulo resta riusabile su altre SaaS.
