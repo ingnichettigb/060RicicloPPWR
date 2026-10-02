@@ -22,6 +22,13 @@
       "when": 1790761816185,
       "tag": "0002_titolo_valutazione_senza_default_italiano",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790923490950,
+      "tag": "0003_lead_emails",
+      "breakpoints": true
     }
   ]
 }
