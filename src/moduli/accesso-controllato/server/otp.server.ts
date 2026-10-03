@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: otp.server.ts
 // Percorso: src/moduli/accesso-controllato/server/otp.server.ts
-// Revisione: Rev. 4 (intercetta sia bounced che suppressed -> ERR017)
-// Data/Ora: 2026-10-03 14:35
+// Revisione: Rev. 5 (doppio polling stato Resend per intercettare rimbalzi e soppressioni)
+// Data/Ora: 2026-10-03 14:55
 // ======================================================================
 
 // SOLO SERVER. Richiesta e verifica del codice OTP via email, e creazione del token per la sessione Supabase.
@@ -57,6 +57,22 @@ function FN023_ConfrontaCostante(a: string, b: string): boolean {
 }
 
 // ======================================================================
+// Helper: interroga Resend sullo stato finale dell'email inviata
+// ======================================================================
+async function verificaStatoResend(emailId: string, chiaveResend: string): Promise<string | null> {
+  try {
+    const risp = await fetch(`https://api.resend.com/emails/${emailId}`, {
+      headers: { Authorization: `Bearer ${chiaveResend}` },
+    });
+    if (!risp.ok) return null;
+    const json = (await risp.json().catch(() => null)) as { last_event?: string } | null;
+    return json?.last_event ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ======================================================================
 // FN024[InviaEmailOtp]: invia il codice OTP tramite API ufficiale di Resend e verifica lo stato di recapito.
 // ======================================================================
 type EsitoInvioEmail = { ok: true } | { ok: false; codice: "ERR013" | "ERR017" };
@@ -73,6 +89,7 @@ async function FN024_InviaEmailOtp(email: string, codice: string, lingua: Lingua
     `<p>${testi.corpo}:</p>` +
     `<p style="font-size:28px;font-weight:700;letter-spacing:6px">${codice}</p>` +
     `<p style="color:#666">${APP_NAME} — ${OTP_SCADENZA_MINUTI} min</p>`;
+
   try {
     const risposta = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -95,23 +112,20 @@ async function FN024_InviaEmailOtp(email: string, codice: string, lingua: Lingua
     const dati = (await risposta.json().catch(() => null)) as { id?: string } | null;
     const emailId = dati?.id;
 
-    // Attesa per intercettare se la casella è inesistente (hard bounce) o soppressa (suppressed)
     if (emailId) {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      try {
-        const statoRisposta = await fetch(`https://api.resend.com/emails/${emailId}`, {
-          headers: { Authorization: `Bearer ${chiaveResend}` },
-        });
-        if (statoRisposta.ok) {
-          const statoDati = (await statoRisposta.json().catch(() => null)) as { last_event?: string } | null;
-          const evento = statoDati?.last_event;
-          if (evento === "bounced" || evento === "suppressed") {
-            console.error(FN004_FormattaErrore("ERR017"), `Email ${email} non recapitabile (${evento})`);
-            return { ok: false, codice: "ERR017" };
-          }
-        }
-      } catch {
-        // Se il controllo non risponde, si considera l'invio preso in carico
+      // Primo controllo rapido (per 'suppressed' immediato)
+      await new Promise((r) => setTimeout(r, 600));
+      let evento = await verificaStatoResend(emailId, chiaveResend);
+
+      // Secondo controllo (per 'bounced' dal server SMTP destinatario come Libero o Tiscali)
+      if (!evento || evento === "sent") {
+        await new Promise((r) => setTimeout(r, 1400));
+        evento = await verificaStatoResend(emailId, chiaveResend);
+      }
+
+      if (evento === "bounced" || evento === "suppressed") {
+        console.error(FN004_FormattaErrore("ERR017"), `Email ${email} non recapitabile (${evento})`);
+        return { ok: false, codice: "ERR017" };
       }
     }
 
@@ -171,7 +185,12 @@ export async function FN025_RichiediOtp(emailGrezza: string, lingua: LinguaAcces
   }
 
   const esitoInvio = await FN024_InviaEmailOtp(email, codice, lingua);
-  if (!esitoInvio.ok) return { ok: false, codice: esitoInvio.codice };
+  if (!esitoInvio.ok) {
+    // Se l'email è errata/rimbalzata, azzeriamo il codice per non bloccare i dati
+    await db.from("lead_emails").update({ verification_code: null }).eq("email", email);
+    return { ok: false, codice: esitoInvio.codice };
+  }
+
   return { ok: true, scadenzaMinuti: OTP_SCADENZA_MINUTI };
 }
 
@@ -179,7 +198,6 @@ export async function FN025_RichiediOtp(emailGrezza: string, lingua: LinguaAcces
 // FN026[CreaTokenSessione]: crea (se manca) l'utente Supabase e genera il token monouso per aprire la sessione nel browser.
 // ======================================================================
 async function FN026_CreaTokenSessione(email: string): Promise<string | null> {
-  // L'utente può già esistere: l'eventuale errore di creazione viene ignorato di proposito.
   await supabaseAdmin.auth.admin.createUser({ email, email_confirm: true });
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email });
   const tokenHash = data?.properties?.hashed_token;

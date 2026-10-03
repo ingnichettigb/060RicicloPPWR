@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: testi.ts
 // Percorso: src/moduli/accesso-controllato/testi.ts
-// Revisione: Rev. 2 (messaggi di errore arricchiti con indicazioni pratiche in IT, EN, DE, ES)
-// Data/Ora: 2026-10-03 14:50
+// Revisione: Rev. 2 (messaggi di errore completi e rassicuranti con istruzioni per l'utente)
+// Data/Ora: 2026-10-03 14:55
 // ======================================================================
 
 // Testi del modulo nelle 4 lingue (IT, EN, DE, ES). Le condizioni d'uso sono una BOZZA da sostituire con il testo legale.
@@ -269,9 +269,6 @@ const es: Record<ChiaveTesto, string> = {
 
 const DIZIONARI: Record<LinguaAccesso, Record<ChiaveTesto, string>> = { it, en, de, es };
 
-// ======================================================================
-// FN005[OttieniTesto]: restituisce il testo localizzato per una chiave, sostituendo eventuali parametri.
-// ======================================================================
 export function FN005_OttieniTesto(
   lingua: LinguaAccesso,
   chiave: ChiaveTesto,
@@ -287,18 +284,12 @@ export function FN005_OttieniTesto(
   return testo;
 }
 
-// ======================================================================
-// FN006[OttieniTestoErrore]: restituisce il messaggio descrittivo per un codice errore (standard ERRxxx).
-// ======================================================================
 export function FN006_OttieniTestoErrore(lingua: LinguaAccesso, codice: CodiceErrore): string {
   const chiave = `err.${codice}` as ChiaveTesto;
   const dizionario = DIZIONARI[lingua] ?? DIZIONARI.it;
   return dizionario[chiave] ?? CODICI_ERRORE[codice] ?? codice;
 }
 
-// ======================================================================
-// FN007[useTestiAccesso]: hook React che fornisce le funzioni di traduzione per la lingua corrente dell'app.
-// ======================================================================
 export function useTestiAccesso() {
   const lingua = useLinguaApp();
   return {
