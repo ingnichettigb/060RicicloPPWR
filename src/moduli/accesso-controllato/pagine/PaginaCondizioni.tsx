@@ -1,14 +1,14 @@
 // ======================================================================
 // Nome File: PaginaCondizioni.tsx
 // Percorso: src/moduli/accesso-controllato/pagine/PaginaCondizioni.tsx
-// Revisione: Rev. 2 (testo legale completo da condizioni-uso.ts)
-// Data/Ora: 2026-10-03 20:45
+// Revisione: Rev. 3 (verifica consenso vincolata a PUK_ID_KEY ed email)
+// Data/Ora: 2026-10-03 21:05
 // ======================================================================
 
-// Schermata 0003 - Accettazione delle condizioni d'uso (saltata se già accettate per questa licenza).
+// Schermata 0003 - Accettazione delle condizioni d'uso (saltata se già accettate per questo PUK).
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { LICENSE_ID_KEY, ROTTA_HOME } from "../config";
+import { LICENSE_ID_KEY, PUK_ID_KEY, ROTTA_HOME } from "../config";
 import { FN070_OttieniCondizioni } from "../condizioni-uso";
 import { FN004_FormattaErrore } from "../errori";
 import { FN043_ControllaConsensoFn, FN044_RegistraConsensoFn } from "../accesso.functions";
@@ -20,7 +20,7 @@ import { FN065_CorniceAccesso } from "./CorniceAccesso";
 
 // ======================================================================
 // FN054[PaginaCondizioni]: schermata 0003: mostra il testo legale completo
-// nelle 4 lingue e registra l'accettazione.
+// nelle 4 lingue e registra l'accettazione legata al PUK.
 // ======================================================================
 export function FN054_PaginaCondizioni() {
   const { t, te, lingua } = useTestiAccesso();
@@ -36,9 +36,10 @@ export function FN054_PaginaCondizioni() {
   useEffect(() => {
     if (!pronto) return;
     const licenseId = FN008_LeggiChiave(LICENSE_ID_KEY);
-    if (!licenseId) return;
+    const pukId = FN008_LeggiChiave(PUK_ID_KEY);
+    if (!licenseId || !pukId) return;
     let annullato = false;
-    FN043_ControllaConsensoFn({ data: { licenseId } })
+    FN043_ControllaConsensoFn({ data: { licenseId, pukId } })
       .then((r) => {
         if (annullato) return;
         if (r.accettato) {
@@ -57,15 +58,16 @@ export function FN054_PaginaCondizioni() {
   }, [pronto, navigate]);
 
   // ======================================================================
-  // FN055[AccettaCondizioni]: registra il consenso sul server e apre l'applicazione.
+  // FN055[AccettaCondizioni]: registra il consenso per il PUK sul server e apre l'applicazione.
   // ======================================================================
   async function FN055_AccettaCondizioni() {
     const licenseId = FN008_LeggiChiave(LICENSE_ID_KEY);
-    if (!licenseId) return;
+    const pukId = FN008_LeggiChiave(PUK_ID_KEY);
+    if (!licenseId || !pukId) return;
     setMsg(null);
     setBusy(true);
     try {
-      const esito = await FN044_RegistraConsensoFn({ data: { licenseId, lingua } });
+      const esito = await FN044_RegistraConsensoFn({ data: { licenseId, pukId, lingua } });
       if (!esito.ok) {
         setMsg(te(esito.codice));
         return;
