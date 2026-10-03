@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Intestazione } from "@/components/Intestazione";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Copy, Download, FileText, Pencil, Printer, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useT, useTitoloPagina } from "@/lib/i18n";
 import { aziendeDiverse, esportaJson, leggiPacchetto } from "@/lib/esportazione";
 import {
+  caricaEsempi,
   creaValutazione,
   eliminaValutazione,
   salvaAzienda,
@@ -61,6 +62,25 @@ function Elenco() {
     setSelezionataId((prev) => (prev === id ? null : id));
   }
 
+  // Primo accesso: carica le valutazioni di esempio (una sola volta)
+  const esempiAvviati = useRef(false);
+  useEffect(() => {
+    if (!pronto || esempiAvviati.current) return;
+    esempiAvviati.current = true;
+    caricaEsempi(true)
+      .then((fatto) => { if (fatto) void ricarica(); })
+      .catch((e) => console.error("Esempi non caricati", e));
+  }, [pronto, ricarica]);
+
+  async function ripristinaEsempi() {
+    try {
+      await caricaEsempi(false);
+      await ricarica();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Esempi non caricati");
+    }
+  }
+
   async function stampaPdfSelezionata() {
     if (!selezionataId) {
       toast.info("Seleziona prima una valutazione con la spunta a sinistra.");
@@ -73,10 +93,10 @@ function Elenco() {
     try {
       const { scaricaPdf } = await import("@/lib/pdfReport");
       await scaricaPdf({ t, azienda, v, e: calcola(v.componenti) });
-      toast.success(t("rep.scaricato") || "Report scaricato con successo");
+      toast.success("Report scaricato con successo");
     } catch (err) {
       console.error("Download PDF non riuscito", err);
-      toast.error(t("rep.errScarica") || "Errore durante il download del PDF");
+      toast.error("Errore durante il download del PDF");
     }
   }
 
@@ -208,13 +228,22 @@ function Elenco() {
             <div className="px-4 py-14 text-center">
               <div className="text-[13px] font-medium">{t("val.vuotoTitolo")}</div>
               <p className="mx-auto mt-2 max-w-sm text-[12px] text-mist">{t("val.vuotoTesto")}</p>
-              <button
-                type="button"
-                onClick={crea}
-                className="mt-5 rounded-lg bg-signal px-4 py-2 text-[13px] font-medium text-primary-foreground"
-              >
-                {t("val.nuova")}
-              </button>
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={crea}
+                  className="rounded-lg border-[1.5px] border-signal bg-signal px-4 py-2 text-[13px] font-medium text-primary-foreground"
+                >
+                  {t("val.nuova")}
+                </button>
+                <button
+                  type="button"
+                  onClick={ripristinaEsempi}
+                  className="rounded-lg border-[1.5px] border-signal bg-white px-4 py-2 text-[13px] font-medium hover:bg-paper"
+                >
+                  Ripristina esempi
+                </button>
+              </div>
             </div>
           ) : (
             <table className="w-full text-[13px]">
