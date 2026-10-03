@@ -9,7 +9,8 @@
 
 export const APP_CODE = "060RicicloPPWR";
 export const APP_NAME = "Riciclabilità PPWR";
-export const TERMS_VERSION = "v1";
+// Aumentare la versione ogni volta che cambia il testo delle condizioni: obbliga tutti a riaccettarle.
+export const TERMS_VERSION = "v2";
 // Mittente: letto dal secret RESEND_FROM_EMAIL sul server (vedi otp.server.ts).
 export const EMAIL_MITTENTE = "";
 
