@@ -1,11 +1,11 @@
 // ======================================================================
 // Nome File: errori.ts
 // Percorso: src/moduli/accesso-controllato/errori.ts
-// Revisione: Rev. 2 (aggiunta ERR017 ed estensione descrizioni tecniche)
-// Data/Ora: 2026-10-03 14:50
+// Revisione: Rev. 2 (aggiunta ERR017)
+// Data/Ora: 2026-10-03 14:55
 // ======================================================================
 
-// Codici errore standard ERRxxx. Da ERR001 a ERR500 coincidono con lo standard del portfolio (ex E-xxx).
+// Codici errore standard ERRxxx. Da ERR001 a ERR500 coincidono con lo standard del portfolio.
 // ERR010-ERR017 sono specifiche di questo modulo. ERR900 è usato dal pulsante di uscita dell'app.
 
 export const CODICI_ERRORE = {
