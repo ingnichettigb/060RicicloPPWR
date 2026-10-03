@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: PaginaAttivazione.tsx
 // Percorso: src/moduli/accesso-controllato/pagine/PaginaAttivazione.tsx
-// Revisione: Rev. 1
-// Data/Ora: 2026-10-01 21:45
+// Revisione: Rev. 2 (sanitizzazione automatica PUK contro elenco puntato •)
+// Data/Ora: 2026-10-03 14:35
 // ======================================================================
 
 // Schermata 0002 - Attivazione della licenza con chiave e codice PUK.
@@ -16,6 +16,20 @@ import { FN008_LeggiChiave, FN012_SalvaAttivazione } from "../stato";
 import { CLASSE_CAMPO, CLASSE_ERRORE, CLASSE_ETICHETTA, CLASSE_PULSANTE } from "../stili";
 import { useTestiAccesso } from "../testi";
 import { FN065_CorniceAccesso } from "./CorniceAccesso";
+
+// ======================================================================
+// Helper: rimuove dal PUK eventuali caratteri di elenco puntato (•, *, -), spazi o apici incollati per sbaglio
+// ======================================================================
+function pulisciPuk(valore: string): string {
+  return valore
+    .replace(/^[•\s\-\*\u2022\u25E6\u2023\u25AA\u25CF]+/g, "") // Rimuove pallini e simboli all'inizio
+    .replace(/[\s\r\n\t]/g, "") // Rimuove spazi e a capo
+    .trim();
+}
+
+function pulisciChiave(valore: string): string {
+  return valore.replace(/[\s\r\n\t]/g, "").trim();
+}
 
 // ======================================================================
 // FN052[PaginaAttivazione]: schermata 0002: chiede chiave di licenza e PUK e li invia al server per l'attivazione.
@@ -40,14 +54,18 @@ export function FN052_PaginaAttivazione() {
   async function FN053_AttivaLicenzaUi(e: FormEvent) {
     e.preventDefault();
     setMsg(null);
-    if (!chiave.trim() || !puk.trim()) {
+
+    const chiavePulita = pulisciChiave(chiave);
+    const pukPulito = pulisciPuk(puk);
+
+    if (!chiavePulita || !pukPulito) {
       setMsg(te("ERR016"));
       return;
     }
     setBusy(true);
     try {
       const esito = await FN041_AttivaLicenzaFn({
-        data: { licenseKey: chiave.trim(), puk: puk.trim() },
+        data: { licenseKey: chiavePulita, puk: pukPulito },
       });
       if (!esito.ok) {
         setMsg(te(esito.codice));
@@ -78,7 +96,7 @@ export function FN052_PaginaAttivazione() {
               autoComplete="off"
               value={chiave}
               maxLength={200}
-              onChange={(ev) => setChiave(ev.target.value)}
+              onChange={(ev) => setChiave(pulisciChiave(ev.target.value))}
               className={CLASSE_CAMPO}
             />
           </label>
@@ -91,7 +109,8 @@ export function FN052_PaginaAttivazione() {
               autoComplete="off"
               value={puk}
               maxLength={200}
-              onChange={(ev) => setPuk(ev.target.value)}
+              placeholder="es. PUK-4506BE07C6"
+              onChange={(ev) => setPuk(pulisciPuk(ev.target.value))}
               className={CLASSE_CAMPO}
             />
           </label>
