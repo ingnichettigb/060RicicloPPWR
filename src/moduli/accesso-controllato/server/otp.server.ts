@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: otp.server.ts
 // Percorso: src/moduli/accesso-controllato/server/otp.server.ts
-// Revisione: Rev. 2 (chiamata diretta API Resend)
-// Data/Ora: 2026-10-03 10:58
+// Revisione: Rev. 3 (chiamata diretta Resend con controllo rimbalzo ERR017)
+// Data/Ora: 2026-10-03 12:30
 // ======================================================================
 
 // SOLO SERVER. Richiesta e verifica del codice OTP via email, e creazione del token per la sessione Supabase.
@@ -57,13 +57,15 @@ function FN023_ConfrontaCostante(a: string, b: string): boolean {
 }
 
 // ======================================================================
-// FN024[InviaEmailOtp]: invia il codice OTP tramite API ufficiale di Resend.
+// FN024[InviaEmailOtp]: invia il codice OTP tramite API ufficiale di Resend e verifica lo stato di consegna.
 // ======================================================================
-async function FN024_InviaEmailOtp(email: string, codice: string, lingua: LinguaAccesso): Promise<boolean> {
+type EsitoInvioEmail = { ok: true } | { ok: false; codice: "ERR013" | "ERR017" };
+
+async function FN024_InviaEmailOtp(email: string, codice: string, lingua: LinguaAccesso): Promise<EsitoInvioEmail> {
   const chiaveResend = process.env["RESEND_API_KEY"];
   if (!chiaveResend) {
     console.error(FN004_FormattaErrore("ERR013"), "RESEND_API_KEY mancante");
-    return false;
+    return { ok: false, codice: "ERR013" };
   }
   const testi = TESTI_EMAIL[lingua];
   const mittente = process.env["RESEND_FROM_EMAIL"] || EMAIL_MITTENTE;
@@ -87,12 +89,35 @@ async function FN024_InviaEmailOtp(email: string, codice: string, lingua: Lingua
     });
     if (!risposta.ok) {
       console.error(FN004_FormattaErrore("ERR013"), risposta.status, await risposta.text());
-      return false;
+      return { ok: false, codice: "ERR013" };
     }
-    return true;
+
+    const dati = (await risposta.json().catch(() => null)) as { id?: string } | null;
+    const emailId = dati?.id;
+
+    // Piccola attesa per verificare se la casella è inesistente (hard bounce immediato da server destinatario)
+    if (emailId) {
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      try {
+        const statoRisposta = await fetch(`https://api.resend.com/emails/${emailId}`, {
+          headers: { Authorization: `Bearer ${chiaveResend}` },
+        });
+        if (statoRisposta.ok) {
+          const statoDati = (await statoRisposta.json().catch(() => null)) as { last_event?: string } | null;
+          if (statoDati?.last_event === "bounced") {
+            console.error(FN004_FormattaErrore("ERR017"), `Email ${email} rimbalzata (non esiste)`);
+            return { ok: false, codice: "ERR017" };
+          }
+        }
+      } catch {
+        // Se il controllo non risponde, si considera l'invio preso in carico
+      }
+    }
+
+    return { ok: true };
   } catch (errore) {
     console.error(FN004_FormattaErrore("ERR013"), errore);
-    return false;
+    return { ok: false, codice: "ERR013" };
   }
 }
 
@@ -144,8 +169,8 @@ export async function FN025_RichiediOtp(emailGrezza: string, lingua: LinguaAcces
     return { ok: false, codice: "ERR500" };
   }
 
-  const inviata = await FN024_InviaEmailOtp(email, codice, lingua);
-  if (!inviata) return { ok: false, codice: "ERR013" };
+  const esitoInvio = await FN024_InviaEmailOtp(email, codice, lingua);
+  if (!esitoInvio.ok) return { ok: false, codice: esitoInvio.codice };
   return { ok: true, scadenzaMinuti: OTP_SCADENZA_MINUTI };
 }
 
