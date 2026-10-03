@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: otp.server.ts
 // Percorso: src/moduli/accesso-controllato/server/otp.server.ts
-// Revisione: Rev. 1
-// Data/Ora: 2026-10-01 21:43
+// Revisione: Rev. 2 (chiamata diretta API Resend)
+// Data/Ora: 2026-10-03 10:58
 // ======================================================================
 
 // SOLO SERVER. Richiesta e verifica del codice OTP via email, e creazione del token per la sessione Supabase.
@@ -57,34 +57,29 @@ function FN023_ConfrontaCostante(a: string, b: string): boolean {
 }
 
 // ======================================================================
-// FN024[InviaEmailOtp]: invia il codice OTP con il gateway Resend di Lovable; restituisce false se l'invio fallisce.
+// FN024[InviaEmailOtp]: invia il codice OTP tramite API ufficiale di Resend.
 // ======================================================================
-async function FN024_InviaEmailOtp(
-  email: string,
-  codice: string,
-  lingua: LinguaAccesso,
-): Promise<boolean> {
-  const chiaveGateway = process.env["LOVABLE_API_KEY"];
+async function FN024_InviaEmailOtp(email: string, codice: string, lingua: LinguaAccesso): Promise<boolean> {
   const chiaveResend = process.env["RESEND_API_KEY"];
-  if (!chiaveGateway || !chiaveResend) {
-    console.error(FN004_FormattaErrore("ERR013"), "LOVABLE_API_KEY o RESEND_API_KEY mancanti");
+  if (!chiaveResend) {
+    console.error(FN004_FormattaErrore("ERR013"), "RESEND_API_KEY mancante");
     return false;
   }
   const testi = TESTI_EMAIL[lingua];
+  const mittente = process.env["RESEND_FROM_EMAIL"] || EMAIL_MITTENTE;
   const html =
     `<p>${testi.corpo}:</p>` +
     `<p style="font-size:28px;font-weight:700;letter-spacing:6px">${codice}</p>` +
     `<p style="color:#666">${APP_NAME} — ${OTP_SCADENZA_MINUTI} min</p>`;
   try {
-    const risposta = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
+    const risposta = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${chiaveGateway}`,
-        "X-Connection-Api-Key": chiaveResend,
+        Authorization: `Bearer ${chiaveResend}`,
       },
       body: JSON.stringify({
-        from: process.env["RESEND_FROM_EMAIL"] || EMAIL_MITTENTE,
+        from: mittente,
         to: [email],
         subject: `${APP_NAME} — ${testi.oggetto}`,
         html,
@@ -104,10 +99,7 @@ async function FN024_InviaEmailOtp(
 // ======================================================================
 // FN025[RichiediOtp]: genera e salva un OTP (max 3 richieste ogni 24 ore per email) e lo invia per email.
 // ======================================================================
-export async function FN025_RichiediOtp(
-  emailGrezza: string,
-  lingua: LinguaAccesso,
-): Promise<EsitoRichiestaOtp> {
+export async function FN025_RichiediOtp(emailGrezza: string, lingua: LinguaAccesso): Promise<EsitoRichiestaOtp> {
   const email = FN021_NormalizzaEmail(emailGrezza);
   if (!email) return { ok: false, codice: "ERR010" };
 
@@ -175,10 +167,7 @@ async function FN026_CreaTokenSessione(email: string): Promise<string | null> {
 // ======================================================================
 // FN027[VerificaOtp]: controlla il codice (scadenza 10 minuti, max 5 errori), segna l'email verificata e restituisce il token di sessione.
 // ======================================================================
-export async function FN027_VerificaOtp(
-  emailGrezza: string,
-  codice: string,
-): Promise<EsitoVerificaOtp> {
+export async function FN027_VerificaOtp(emailGrezza: string, codice: string): Promise<EsitoVerificaOtp> {
   const email = FN021_NormalizzaEmail(emailGrezza);
   if (!email) return { ok: false, codice: "ERR010" };
   if (!/^\d{6}$/.test(codice)) return { ok: false, codice: "ERR012" };
@@ -196,8 +185,7 @@ export async function FN027_VerificaOtp(
   if (!riga || !riga.verification_code || !riga.otp_sent_at) return { ok: false, codice: "ERR012" };
 
   const errori = Number(riga.otp_failures ?? 0);
-  const scaduto =
-    Date.now() - new Date(String(riga.otp_sent_at)).getTime() > OTP_SCADENZA_MINUTI * 60_000;
+  const scaduto = Date.now() - new Date(String(riga.otp_sent_at)).getTime() > OTP_SCADENZA_MINUTI * 60_000;
   if (scaduto || errori >= OTP_MAX_ERRORI) return { ok: false, codice: "ERR012" };
 
   if (!FN023_ConfrontaCostante(String(riga.verification_code), codice)) {
