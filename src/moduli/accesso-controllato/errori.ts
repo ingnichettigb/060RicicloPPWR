@@ -1,12 +1,12 @@
 // ======================================================================
 // Nome File: errori.ts
 // Percorso: src/moduli/accesso-controllato/errori.ts
-// Revisione: Rev. 1
-// Data/Ora: 2026-10-01 21:42
+// Revisione: Rev. 2 (aggiunta ERR017 ed estensione descrizioni tecniche)
+// Data/Ora: 2026-10-03 14:50
 // ======================================================================
 
 // Codici errore standard ERRxxx. Da ERR001 a ERR500 coincidono con lo standard del portfolio (ex E-xxx).
-// ERR010-ERR016 sono aggiunte di questo modulo. ERR900 è usato dal pulsante di uscita dell'app.
+// ERR010-ERR017 sono specifiche di questo modulo. ERR900 è usato dal pulsante di uscita dell'app.
 
 export const CODICI_ERRORE = {
   ERR001: "Email non verificata tramite OTP.",
@@ -17,6 +17,7 @@ export const CODICI_ERRORE = {
   ERR014: "Creazione della sessione di accesso non riuscita.",
   ERR015: "Sessione di accesso assente o scaduta.",
   ERR016: "Campi obbligatori mancanti.",
+  ERR017: "Indirizzo email inesistente o non raggiungibile.",
   ERR101: "Licenza inesistente per questo prodotto oppure disattivata.",
   ERR103: "Licenza scaduta.",
   ERR201: "Codice PUK inesistente.",
