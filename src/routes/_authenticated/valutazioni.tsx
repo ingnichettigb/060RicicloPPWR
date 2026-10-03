@@ -68,7 +68,7 @@ function Elenco() {
     if (!pronto || esempiAvviati.current) return;
     esempiAvviati.current = true;
     caricaEsempi(true)
-      .then((fatto) => fatto && ricarica())
+      .then((fatto) => { if (fatto) void ricarica(); })
       .catch((e) => console.error("Esempi non caricati", e));
   }, [pronto, ricarica]);
 
@@ -93,10 +93,10 @@ function Elenco() {
     try {
       const { scaricaPdf } = await import("@/lib/pdfReport");
       await scaricaPdf({ t, azienda, v, e: calcola(v.componenti) });
-      toast.success(t("rep.scaricato") || "Report scaricato con successo");
+      toast.success("Report scaricato con successo");
     } catch (err) {
       console.error("Download PDF non riuscito", err);
-      toast.error(t("rep.errScarica") || "Errore durante il download del PDF");
+      toast.error("Errore durante il download del PDF");
     }
   }
 
