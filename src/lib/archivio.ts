@@ -138,3 +138,19 @@ export async function salvaAzienda(a: Azienda) {
   });
   if (error) throw error;
 }
+
+const chiaveEsempi = (uid: string) => `ppwr:esempi-caricati:${uid}`;
+
+/** Inserisce le valutazioni di esempio. Con `soloPrimaVolta` avviene una sola volta per utente e solo se l'archivio è vuoto. */
+export async function caricaEsempi(soloPrimaVolta: boolean): Promise<boolean> {
+  const uid = await utenteId();
+  if (soloPrimaVolta) {
+    if (localStorage.getItem(chiaveEsempi(uid))) return false;
+    localStorage.setItem(chiaveEsempi(uid), "1");
+    const { count } = await supabase.from("valutazioni").select("id", { count: "exact", head: true });
+    if ((count ?? 0) > 0) return false;
+  }
+  const { esempiPredefiniti } = await import("./esempiPredefiniti");
+  for (const e of esempiPredefiniti()) await creaValutazione(e);
+  return true;
+}
