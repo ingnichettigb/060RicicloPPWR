@@ -1,14 +1,15 @@
 // ======================================================================
 // Nome File: PaginaCondizioni.tsx
 // Percorso: src/moduli/accesso-controllato/pagine/PaginaCondizioni.tsx
-// Revisione: Rev. 1
-// Data/Ora: 2026-10-01 21:45
+// Revisione: Rev. 2 (testo legale completo da condizioni-uso.ts)
+// Data/Ora: 2026-10-03 20:45
 // ======================================================================
 
 // Schermata 0003 - Accettazione delle condizioni d'uso (saltata se già accettate per questa licenza).
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { LICENSE_ID_KEY, ROTTA_HOME } from "../config";
+import { FN070_OttieniCondizioni } from "../condizioni-uso";
 import { FN004_FormattaErrore } from "../errori";
 import { FN043_ControllaConsensoFn, FN044_RegistraConsensoFn } from "../accesso.functions";
 import { useRichiediLivello } from "../hookAccesso";
@@ -18,7 +19,8 @@ import { useTestiAccesso } from "../testi";
 import { FN065_CorniceAccesso } from "./CorniceAccesso";
 
 // ======================================================================
-// FN054[PaginaCondizioni]: schermata 0003: mostra le condizioni nelle 4 lingue e registra l'accettazione.
+// FN054[PaginaCondizioni]: schermata 0003: mostra il testo legale completo
+// nelle 4 lingue e registra l'accettazione.
 // ======================================================================
 export function FN054_PaginaCondizioni() {
   const { t, te, lingua } = useTestiAccesso();
@@ -28,6 +30,8 @@ export function FN054_PaginaCondizioni() {
   const [accetto, setAccetto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const condizioni = FN070_OttieniCondizioni(lingua);
 
   useEffect(() => {
     if (!pronto) return;
@@ -77,15 +81,28 @@ export function FN054_PaginaCondizioni() {
   }
 
   return (
-    <FN065_CorniceAccesso schermata="0003" titolo={t("con.titolo")}>
+    <FN065_CorniceAccesso schermata="0003" titolo={condizioni.titoloPagina}>
       {!pronto || !verificato ? (
         <p className="mt-4 text-[13px] text-muted-foreground">{t("con.verifica")}</p>
       ) : (
         <div className="mt-4 space-y-3 text-[13px]">
-          <p>{t("con.p1")}</p>
-          <p>{t("con.p2")}</p>
-          <p>{t("con.p3")}</p>
-          <p>{t("con.p4")}</p>
+          <p className="text-[12px] text-muted-foreground">{condizioni.passo}</p>
+          <p>{condizioni.intro}</p>
+
+          <div className="max-h-72 space-y-3 overflow-y-auto rounded-md border border-border bg-muted/30 p-3">
+            <div>
+              <h2 className="text-[13px] font-semibold">{condizioni.intestazione}</h2>
+              <p className="text-[12px] text-muted-foreground">{condizioni.sottotitolo}</p>
+            </div>
+            {condizioni.sezioni.map((sezione) => (
+              <div key={sezione.titolo}>
+                <h3 className="text-[12px] font-semibold">{sezione.titolo}</h3>
+                <p className="mt-0.5 leading-relaxed">{sezione.corpo}</p>
+              </div>
+            ))}
+            <p className="text-[12px] text-muted-foreground">{condizioni.piePagina}</p>
+          </div>
+
           <label className="flex items-start gap-2">
             <input
               id="0005_CheckAccettoCondizioni"
