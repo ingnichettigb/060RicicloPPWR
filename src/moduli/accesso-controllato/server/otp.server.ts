@@ -1,8 +1,8 @@
 // ======================================================================
 // Nome File: otp.server.ts
 // Percorso: src/moduli/accesso-controllato/server/otp.server.ts
-// Revisione: Rev. 3 (chiamata diretta Resend con controllo rimbalzo ERR017)
-// Data/Ora: 2026-10-03 12:30
+// Revisione: Rev. 4 (intercetta sia bounced che suppressed -> ERR017)
+// Data/Ora: 2026-10-03 14:35
 // ======================================================================
 
 // SOLO SERVER. Richiesta e verifica del codice OTP via email, e creazione del token per la sessione Supabase.
@@ -57,7 +57,7 @@ function FN023_ConfrontaCostante(a: string, b: string): boolean {
 }
 
 // ======================================================================
-// FN024[InviaEmailOtp]: invia il codice OTP tramite API ufficiale di Resend e verifica lo stato di consegna.
+// FN024[InviaEmailOtp]: invia il codice OTP tramite API ufficiale di Resend e verifica lo stato di recapito.
 // ======================================================================
 type EsitoInvioEmail = { ok: true } | { ok: false; codice: "ERR013" | "ERR017" };
 
@@ -95,7 +95,7 @@ async function FN024_InviaEmailOtp(email: string, codice: string, lingua: Lingua
     const dati = (await risposta.json().catch(() => null)) as { id?: string } | null;
     const emailId = dati?.id;
 
-    // Piccola attesa per verificare se la casella è inesistente (hard bounce immediato da server destinatario)
+    // Attesa per intercettare se la casella è inesistente (hard bounce) o soppressa (suppressed)
     if (emailId) {
       await new Promise((resolve) => setTimeout(resolve, 1200));
       try {
@@ -104,8 +104,9 @@ async function FN024_InviaEmailOtp(email: string, codice: string, lingua: Lingua
         });
         if (statoRisposta.ok) {
           const statoDati = (await statoRisposta.json().catch(() => null)) as { last_event?: string } | null;
-          if (statoDati?.last_event === "bounced") {
-            console.error(FN004_FormattaErrore("ERR017"), `Email ${email} rimbalzata (non esiste)`);
+          const evento = statoDati?.last_event;
+          if (evento === "bounced" || evento === "suppressed") {
+            console.error(FN004_FormattaErrore("ERR017"), `Email ${email} non recapitabile (${evento})`);
             return { ok: false, codice: "ERR017" };
           }
         }
