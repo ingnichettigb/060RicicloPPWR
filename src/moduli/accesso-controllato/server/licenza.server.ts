@@ -1,20 +1,14 @@
 // ======================================================================
 // Nome File: licenza.server.ts
 // Percorso: src/moduli/accesso-controllato/server/licenza.server.ts
-// Revisione: Rev. 1
-// Data/Ora: 2026-10-01 21:44
+// Revisione: Rev. 2 (Consenso vincolato a PUK_CODE ed email utente)
+// Data/Ora: 2026-10-03 21:05
 // ======================================================================
 
 // SOLO SERVER. Licenze, PUK, quota export PDF e consenso, sul database esterno condiviso del portfolio.
 import { APP_CODE, TERMS_VERSION } from "../config";
 import { FN004_FormattaErrore } from "../errori";
-import type {
-  EsitoAttivazione,
-  EsitoConsenso,
-  EsitoDecremento,
-  LinguaAccesso,
-  StatoLicenza,
-} from "../tipi";
+import type { EsitoAttivazione, EsitoConsenso, EsitoDecremento, LinguaAccesso, StatoLicenza } from "../tipi";
 import { FN019_ClienteEsterno, FN020_ClienteLocale } from "./esterno.server";
 
 type RigaLicenza = {
@@ -69,11 +63,7 @@ async function FN030_EmailVerificata(email: string): Promise<boolean> {
 async function FN031_RisolviUtente(email: string, crea: boolean): Promise<string | null> {
   const ext = FN019_ClienteEsterno();
   const cerca = async (): Promise<string | null> => {
-    const { data, error } = await ext
-      .from("users")
-      .select("id")
-      .ilike("email", FN028_EscapeLike(email))
-      .limit(1);
+    const { data, error } = await ext.from("users").select("id").ilike("email", FN028_EscapeLike(email)).limit(1);
     if (error) throw new Error(error.message);
     const riga = (data ?? [])[0] as { id: string } | undefined;
     return riga?.id ?? null;
@@ -114,9 +104,7 @@ export async function FN032_AttivaLicenza(
   if (errLicenze) throw new Error(errLicenze.message);
   const elenco = (licenze ?? []) as RigaLicenza[];
   if (elenco.length === 0) return { ok: false, codice: "ERR101" };
-  const valide = elenco.filter(
-    (l) => !l.expires_at || new Date(l.expires_at).getTime() > ora.getTime(),
-  );
+  const valide = elenco.filter((l) => !l.expires_at || new Date(l.expires_at).getTime() > ora.getTime());
   if (valide.length === 0) return { ok: false, codice: "ERR103" };
 
   const { data: rigaPuk, error: errPuk } = await ext
@@ -160,11 +148,7 @@ export async function FN032_AttivaLicenza(
       .select("id");
     if (errClaim) throw new Error(errClaim.message);
     if (!aggiornati || aggiornati.length === 0) {
-      const { data: rilettura } = await ext
-        .from("puk_codes")
-        .select("user_id")
-        .eq("id", rigaPuk.id)
-        .maybeSingle();
+      const { data: rilettura } = await ext.from("puk_codes").select("user_id").eq("id", rigaPuk.id).maybeSingle();
       if (rilettura?.user_id !== utenteId) return { ok: false, codice: "ERR202" };
       riattivata = true;
     }
@@ -214,23 +198,15 @@ export async function FN034_LeggiQuotaPdf(email: string, pukId: string): Promise
 // ======================================================================
 // FN035[DecrementaQuotaPdf]: scala di 1 gli export PDF del PUK con guardia anti-concorrenza; non tocca mai la licenza.
 // ======================================================================
-export async function FN035_DecrementaQuotaPdf(
-  email: string,
-  pukId: string,
-): Promise<EsitoDecremento> {
+export async function FN035_DecrementaQuotaPdf(email: string, pukId: string): Promise<EsitoDecremento> {
   if (!(await FN033_ProprietaPuk(email, pukId))) return { ok: false, codice: "ERR204" };
   const ext = FN019_ClienteEsterno();
   for (let tentativo = 0; tentativo < 3; tentativo++) {
-    const { data, error } = await ext
-      .from("puk_codes")
-      .select("pdf_exports_remaining")
-      .eq("id", pukId)
-      .maybeSingle();
+    const { data, error } = await ext.from("puk_codes").select("pdf_exports_remaining").eq("id", pukId).maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) return { ok: false, codice: "ERR204" };
     const attuale = data.pdf_exports_remaining;
-    if (typeof attuale !== "number")
-      return { ok: true, consentito: true, remaining: null, esaurito: false };
+    if (typeof attuale !== "number") return { ok: true, consentito: true, remaining: null, esaurito: false };
     if (attuale <= 0) return { ok: true, consentito: false, remaining: 0, esaurito: true };
     const nuovo = attuale - 1;
     const { data: aggiornati, error: errAgg } = await ext
@@ -249,13 +225,27 @@ export async function FN035_DecrementaQuotaPdf(
 }
 
 // ======================================================================
-// FN036[ConsensoAccettato]: controlla se per la licenza esiste già il consenso alla versione corrente delle condizioni.
+// FN036[ConsensoAccettato]: controlla se per il PUK e l'utente esiste già
+// il consenso alla versione corrente delle condizioni sul database centrale.
 // ======================================================================
-export async function FN036_ConsensoAccettato(licenseId: string): Promise<boolean> {
-  const { data, error } = await FN019_ClienteEsterno()
+export async function FN036_ConsensoAccettato(email: string, licenseId: string, pukId: string): Promise<boolean> {
+  const ext = FN019_ClienteEsterno();
+  const utenteId = await FN031_RisolviUtente(email, false);
+  if (!utenteId) return false;
+
+  const { data: rigaPuk, error: errPuk } = await ext
+    .from("puk_codes")
+    .select("code, user_id")
+    .eq("id", pukId)
+    .maybeSingle();
+  if (errPuk) throw new Error(errPuk.message);
+  if (!rigaPuk || rigaPuk.user_id !== utenteId) return false;
+
+  const { data, error } = await ext
     .from("license_consents")
     .select("id")
     .eq("license_id", licenseId)
+    .eq("puk_code", rigaPuk.code)
     .eq("app_code", APP_CODE)
     .eq("terms_version", TERMS_VERSION)
     .limit(1);
@@ -264,22 +254,41 @@ export async function FN036_ConsensoAccettato(licenseId: string): Promise<boolea
 }
 
 // ======================================================================
-// FN037[RegistraConsenso]: registra il consenso alle condizioni (lingua, versione, user agent, IP) se la licenza è valida.
+// FN037[RegistraConsenso]: registra il consenso vincolato al PUK e all'utente
+// (lingua, versione, user agent, IP) se la licenza e il PUK sono validi.
 // ======================================================================
 export async function FN037_RegistraConsenso(
+  email: string,
   licenseId: string,
+  pukId: string,
   lingua: LinguaAccesso,
   userAgent: string | null,
   ip: string | null,
 ): Promise<EsitoConsenso> {
   const stato = await FN029_StatoLicenza(licenseId);
   if (!stato.valida) return { ok: false, codice: "ERR302" };
-  if (await FN036_ConsensoAccettato(licenseId)) return { ok: true };
-  const { error } = await FN019_ClienteEsterno().from("license_consents").insert({
+
+  const ext = FN019_ClienteEsterno();
+  const utenteId = await FN031_RisolviUtente(email, false);
+  if (!utenteId) return { ok: false, codice: "ERR015" };
+
+  const { data: rigaPuk, error: errPuk } = await ext
+    .from("puk_codes")
+    .select("code, user_id")
+    .eq("id", pukId)
+    .maybeSingle();
+  if (errPuk) throw new Error(errPuk.message);
+  if (!rigaPuk || rigaPuk.user_id !== utenteId) return { ok: false, codice: "ERR204" };
+
+  if (await FN036_ConsensoAccettato(email, licenseId, pukId)) return { ok: true };
+
+  const { error } = await ext.from("license_consents").insert({
     license_id: licenseId,
+    puk_code: rigaPuk.code,
     app_code: APP_CODE,
     language: lingua,
     terms_version: TERMS_VERSION,
+    accepted_at: new Date().toISOString(),
     user_agent: userAgent,
     ip_address: ip,
   });
